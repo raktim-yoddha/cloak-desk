@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="CloakDesk.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CloakDesk"
+    Title="Cloak Desk">
+
+    <Grid x:Name="Root">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TitleBar x:Name="AppTitleBar" Title="Cloak Desk" Background="{ThemeResource GlassBarBrush}"
+                  BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="0,1,0,0"
+                  IsBackButtonVisible="False" IsPaneToggleButtonVisible="True" PaneToggleRequested="OnPaneToggle" />
+
+        <NavigationView x:Name="Nav" Grid.Row="1" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="False"
+                        IsSettingsVisible="True" OpenPaneLength="280" PaneDisplayMode="Left"
+                        ItemInvoked="OnNavInvoked" SelectionChanged="OnNavSelected">
+            <NavigationView.MenuItemTemplate>
+                <DataTemplate x:DataType="local:Preset">
+                    <NavigationViewItem Content="{x:Bind Name, Mode=OneWay}">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE72E;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </DataTemplate>
+            </NavigationView.MenuItemTemplate>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="NewPresetItem" Content="New preset" SelectsOnInvoked="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE710;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <ScrollViewer>
+                <Grid Padding="36,24,36,36">
+                    <StackPanel MaxWidth="1000" HorizontalAlignment="Stretch" Spacing="4">
+
+                        <TextBlock x:Name="PageTitle" Margin="0,0,0,8" Style="{StaticResource TitleTextBlockStyle}" />
+
+                        <!-- Preset page -->
+                        <StackPanel x:Name="PresetPage" Spacing="4">
+                            <local:SettingsRow x:Name="CloakRow" Glyph="&#xED1A;" Header="Cloak">
+                                <ToggleSwitch x:Name="CloakSwitch" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnCloakToggled" />
+                            </local:SettingsRow>
+                            <InfoBar x:Name="ErrorBar" IsClosable="False" Severity="Error" />
+
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Curtain" />
+                            <local:SettingsRow Glyph="&#xE8AC;" Header="Preset name" Description="Shown in the tray menu">
+                                <TextBox x:Name="NameBox" Width="240" TextChanged="OnNameChanged" AutomationProperties.Name="Preset name" />
+                            </local:SettingsRow>
+                            <local:SettingsRow Glyph="&#xE790;" Header="Curtain color" Description="What viewers see over hidden apps">
+                                <Button Padding="4" AutomationProperties.Name="Curtain color">
+                                    <Border x:Name="ColorSwatch" Width="48" Height="24" CornerRadius="2" />
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <ColorPicker x:Name="Picker" ColorChanged="OnColorChanged" IsAlphaEnabled="False" IsMoreButtonVisible="False" />
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </local:SettingsRow>
+                            <local:SettingsRow x:Name="ImageRow" Glyph="&#xE91B;" Header="Curtain image">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="RemoveImageButton" Click="OnClearImage" Content="Remove" />
+                                    <Button Click="OnPickImage" Content="Browse" />
+                                </StackPanel>
+                            </local:SettingsRow>
+                            <local:SettingsRow Glyph="&#xE7F4;" Header="Hide desktop" Description="Wallpaper, desktop icons and taskbar">
+                                <ToggleSwitch x:Name="DesktopSwitch" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnDesktopToggled" />
+                            </local:SettingsRow>
+
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Hidden apps" />
+                            <local:SettingsRow Glyph="&#xE710;" Header="Hide an app" Description="Or press Ctrl+Alt+H while the app is in front">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ComboBox x:Name="AppPicker" Width="240" DropDownOpened="OnPickerOpened" IsEditable="True"
+                                              PlaceholderText="Choose or type an app" AutomationProperties.Name="App to hide" />
+                                    <Button Click="OnAddApp" Content="Add" Style="{StaticResource AccentButtonStyle}" />
+                                </StackPanel>
+                            </local:SettingsRow>
+                            <ItemsControl x:Name="AppList">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <local:SettingsRow Glyph="&#xECAA;" Header="{x:Bind}" Description="Hidden from viewers">
+                                            <Button Click="OnRemoveApp" Content="Remove" Tag="{x:Bind}" />
+                                        </local:SettingsRow>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Preset" />
+                            <local:SettingsRow Glyph="&#xE74D;" Header="Delete preset" Description="You always keep at least one preset">
+                                <Button x:Name="DeletePresetButton" Click="OnDeletePreset" Content="Delete" />
+                            </local:SettingsRow>
+                        </StackPanel>
+
+                        <!-- Settings page -->
+                        <StackPanel x:Name="SettingsPage" Spacing="4" Visibility="Collapsed">
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Margin="1,0,0,6" Text="General" />
+                            <local:SettingsRow Glyph="&#xE7E8;" Header="Start with Windows" Description="Cloak Desk starts in the notification area">
+                                <ToggleSwitch x:Name="StartupSwitch" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnStartupToggled" />
+                            </local:SettingsRow>
+                            <local:SettingsRow Glyph="&#xE765;" Header="Keyboard shortcuts" x:Name="HotkeyRow">
+                                <StackPanel Spacing="4">
+                                    <TextBlock HorizontalAlignment="Right"><Run FontWeight="SemiBold" Text="Ctrl+Alt+C" /> Turn cloak on or off</TextBlock>
+                                    <TextBlock HorizontalAlignment="Right"><Run FontWeight="SemiBold" Text="Ctrl+Alt+H" /> Hide or show the app in front</TextBlock>
+                                </StackPanel>
+                            </local:SettingsRow>
+                            <local:SettingsRow Glyph="&#xE838;" Header="Presets file" x:Name="PresetsFileRow">
+                                <Button Click="OnOpenFolder" Content="Open folder" />
+                            </local:SettingsRow>
+
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="How it works" />
+                            <local:SettingsRow Glyph="&#xE946;" Header="Share the Stage, not your screen"
+                                               Description="When cloak is on, a window called “Cloak Desk Stage” mirrors your screen with curtains over hidden apps. Share that window in Teams, Zoom, Meet or OBS. Keep it behind your other windows or on another display. Cloak Desk itself never appears in a share." />
+                        </StackPanel>
+
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </NavigationView>
+    </Grid>
+</Window>

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cloak Desk presets",
+  "type": "object",
+  "required": ["active", "presets"],
+  "properties": {
+    "active": { "type": "integer", "minimum": 0, "description": "Index of the preset used by the cloak toggle." },
+    "presets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "apps", "desktop", "color"],
+        "properties": {
+          "name": { "type": "string" },
+          "apps": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Lowercase process names without extension (Windows), bundle IDs (macOS), executable names (Linux)."
+          },
+          "desktop": { "type": "boolean", "description": "Also curtain the wallpaper and desktop icons." },
+          "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "image": { "type": ["string", "null"], "description": "Absolute path to a curtain image. Drawn stretched over each curtain area. Overrides color." }
+        }
+      }
+    }
+  }
+}
