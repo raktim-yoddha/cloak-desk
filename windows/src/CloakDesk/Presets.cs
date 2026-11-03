@@ -5,7 +5,10 @@ using System.Text.Json.Serialization;
 
 namespace CloakDesk;
 
-public sealed class Preset : INotifyPropertyChanged
+// Handed to XAML as NavigationView items. Under NativeAOT, CsWinRT can only build the WinRT interface table
+// (INotifyPropertyChanged, ICustomPropertyProvider) for partial classes; without it XAML gets E_NOINTERFACE.
+[WinRT.GeneratedBindableCustomProperty]
+public sealed partial class Preset : INotifyPropertyChanged
 {
     string _name = "New preset";
     public string Name { get => _name; set { _name = value; PropertyChanged?.Invoke(this, new(nameof(Name))); } }
