@@ -1,0 +1,70 @@
+name: Windows
+
+on:
+  push:
+    paths: ["windows/**", ".github/workflows/windows.yml"]
+  pull_request:
+    paths: ["windows/**", ".github/workflows/windows.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Curtain math checks
+        run: dotnet run --project windows/tests/CurtainMath.Check
+
+      - name: Publish (NativeAOT, x64)
+        shell: pwsh
+        run: |
+          $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
+          dotnet publish windows/src/CloakDesk -c Release -r win-x64 -p:Platform=x64 -o out 2>&1 | Tee-Object publish.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Write-Host "---- interop and trimming warnings"
+          Select-String -Path publish.log -Pattern 'warning (CsWinRT|IL\d|WMC|XLS)' | ForEach-Object { $_.Line } | Sort-Object -Unique
+          $size = (Get-ChildItem out -Recurse -File | Measure-Object Length -Sum).Sum
+          Write-Host ("---- publish size {0:N1} MB" -f ($size / 1MB))
+
+      - name: Build (Debug, JIT, console)
+        run: dotnet build windows/src/CloakDesk -c Debug -r win-x64 -p:Platform=x64 -p:OutputType=Exe -o debug
+
+      - name: Install Windows App Runtime 1.8
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe -OutFile war.exe
+          Start-Process .\war.exe -ArgumentList '--quiet', '--force' -Wait
+
+      - name: Smoke test (Debug)
+        id: smoke_debug
+        continue-on-error: true
+        shell: pwsh
+        run: ./windows/ci/smoke.ps1 -Exe debug/CloakDesk.exe -Out smoke -Name debug -Debugger
+
+      - name: Smoke test (Release AOT)
+        id: smoke_release
+        continue-on-error: true
+        shell: pwsh
+        run: ./windows/ci/smoke.ps1 -Exe out/CloakDesk.exe -Out smoke -Name release -Debugger
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke
+          path: |
+            smoke
+            publish.log
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CloakDesk-win-x64
+          path: out
+
+      - name: Fail if the app crashed
+        if: steps.smoke_debug.outcome != 'success' || steps.smoke_release.outcome != 'success'
+        run: exit 1
