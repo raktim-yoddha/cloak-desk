@@ -79,9 +79,12 @@ if ($crashed -and $Debugger) {
     $cdb = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($cdb) {
         Write-Host "[$Name] rerunning under cdb"
-        $cmds = 'sxe -c \"!analyze -v; .ecxr; kn 60; ~*kn 30; q\" c000027b; sxe -c \"!analyze -v; .ecxr; kn 60; q\" av; sxd eh; g; !analyze -v; kn 60; q'
-        & $cdb.FullName -G -lines -c $cmds $Exe *> "$Out\$Name-cdb.txt"
-        Get-Content "$Out\$Name-cdb.txt" | Select-String -Pattern 'STOWED|Error|HRESULT|EXCEPTION|ExceptionCode|SYMBOL_NAME|FAILURE_BUCKET|Microsoft_UI_Xaml|CloakDesk|^\s*[0-9a-f]{2} ' | Select-Object -First 200
+        # Under a debugger WinUI prints XAML errors (with line and position) to the debug output cdb shows.
+        $script = Join-Path $env:RUNNER_TEMP "cdb-$Name.txt"
+        @('sxd eh', 'sxe -c "!analyze -v; kn 60; q" c000027b', 'sxe -c "!analyze -v; kn 60; q" av', 'g', 'q') | Set-Content $script -Encoding ascii
+        $job = Start-Job { param($c, $s, $e, $o) & $c -G -lines -cf $s $e *> $o } -ArgumentList $cdb.FullName, $script, (Resolve-Path $Exe).Path, "$Out\$Name-cdb.txt"
+        if (-not (Wait-Job $job -Timeout 90)) { Stop-Job $job; Get-Process CloakDesk, cdb -ErrorAction SilentlyContinue | Stop-Process -Force }
+        Get-Content "$Out\$Name-cdb.txt" | Select-String -Pattern 'xaml|Line:|Position|WinUI|Error' | Select-Object -First 40 | ForEach-Object { Write-Host $_.Line }
     } else { Write-Host "cdb not found" }
 }
 

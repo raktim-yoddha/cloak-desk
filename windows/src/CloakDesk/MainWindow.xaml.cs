@@ -16,7 +16,8 @@ public sealed partial class MainWindow : Window
     readonly App _app = App.Current;
 
     Preset CurrentPreset => _app.Presets.Current;
-    bool OnSettings => Nav.SelectedItem == Nav.SettingsItem;
+    // SettingsItem is null until the NavigationView loads; null == null must not count as "on settings".
+    bool OnSettings => Nav.SettingsItem is { } settings && Nav.SelectedItem == settings;
     Preset? _loaded; // preset whose values the page currently shows
 
     public MainWindow()
@@ -77,7 +78,7 @@ public sealed partial class MainWindow : Window
         for (int i = 0; i < presets.Count; i++)
         {
             if (i < items.Count) ((NavigationViewItem)items[i]).Content = presets[i].Name;
-            else items.Add(new NavigationViewItem { Content = presets[i].Name, Tag = i, Icon = new FontIcon { Glyph = "\uE72E" } });
+            else items.Add(new NavigationViewItem { Content = presets[i].Name, Tag = i, Icon = new FontIcon { Glyph = "\uE8FD" } });
         }
         if (OnSettings) return;
         var selected = items[Math.Clamp(_app.Presets.Active, 0, items.Count - 1)];
