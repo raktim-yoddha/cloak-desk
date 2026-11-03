@@ -38,8 +38,10 @@ To release:
    `git tag -a v1.2.3 -m "Cloak Desk 1.2.3: <one-line summary>"` then `git push origin v1.2.3`.
 3. `.github/workflows/release.yml` builds x64 and ARM64, runs the smoke test, checks the exe version matches the tag,
    builds the setups and zips, and publishes a GitHub release with that CHANGELOG section as notes.
-   Tags with a pre-release suffix (`v1.3.0-beta.1`) are published as pre-releases.
+   0.x versions and tags with a pre-release suffix are published as GitHub pre-releases.
 
-Bump MAJOR for breaking changes to `presets.json` or removed features, MINOR for new features, PATCH for fixes.
+Cloak Desk is in initial development, so versions are 0.MINOR.PATCH (first release `v0.1.0`):
+bump MINOR for new features or `presets.json` changes, PATCH for fixes. 1.0.0 comes once the app is declared stable;
+after that, MAJOR is for breaking changes.
 
 The setup and exe are not code-signed yet, so SmartScreen will warn on first run. Signing needs a certificate (for example Azure Trusted Signing) added as a repository secret.
