@@ -33,12 +33,14 @@ It is stamped into the exe's file properties, the Settings > About row and the s
 
 To release:
 
-1. Move the `## [Unreleased]` entries in `CHANGELOG.md` under `## [1.2.3] - YYYY-MM-DD` and commit.
-2. Tag with an annotated tag whose message summarizes the release:
-   `git tag -a v1.2.3 -m "Cloak Desk 1.2.3: <one-line summary>"` then `git push origin v1.2.3`.
-3. `.github/workflows/release.yml` builds x64 and ARM64, runs the smoke test, checks the exe version matches the tag,
-   builds the setups and zips, and publishes a GitHub release with that CHANGELOG section as notes.
-   0.x versions and tags with a pre-release suffix are published as GitHub pre-releases.
+1. In `CHANGELOG.md`, move the `## [Unreleased]` entries under a new `## [X.Y.Z] - YYYY-MM-DD` heading.
+   The first line under the heading is the release summary; add the `[X.Y.Z]:` link at the bottom.
+2. Merge that change to `master`. `.github/workflows/release.yml` then creates the annotated tag `vX.Y.Z`
+   (subject from the summary, body from the section), builds x64 and ARM64, runs the full test suite
+   (smoke, end-to-end, installer), checks the exe version matches, and publishes the GitHub release with
+   `CloakDesk-Setup-X.Y.Z-x64.exe`, `-arm64.exe`, portable zips and `SHA256SUMS.txt`, notes from that section.
+   Pushing an annotated tag `vX.Y.Z` yourself runs the same pipeline.
+3. 0.x versions and tags with a pre-release suffix are published as GitHub pre-releases.
 
 Cloak Desk is in initial development, so versions are 0.MINOR.PATCH (first release `v0.1.0`):
 bump MINOR for new features or `presets.json` changes, PATCH for fixes. 1.0.0 comes once the app is declared stable;
