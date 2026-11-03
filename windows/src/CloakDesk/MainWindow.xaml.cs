@@ -47,6 +47,7 @@ public sealed partial class MainWindow : Window
         StartupSwitch.IsOn = App.StartWithWindows;
         HotkeyRow.Description = _app.Tray.HotkeyError ?? "Work in any app";
         PresetsFileRow.Description = PresetFile.FilePath;
+        VersionRow.Description = $"Version {App.Version}";
         _app.Changed += Refresh;
         Closed += (_, _) => _app.Changed -= Refresh;
         Refresh();

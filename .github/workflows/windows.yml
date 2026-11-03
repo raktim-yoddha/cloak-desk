@@ -2,39 +2,54 @@ name: Windows
 
 on:
   push:
+    branches: ["**"]
     paths: ["windows/**", ".github/workflows/windows.yml"]
   pull_request:
     paths: ["windows/**", ".github/workflows/windows.yml"]
   workflow_dispatch:
+  workflow_call: # release.yml runs the same build and smoke test before packaging
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # MinVer reads the version from tags
 
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.x
 
       - name: Curtain math checks
+        if: matrix.arch == 'x64'
         run: dotnet run --project windows/tests/CurtainMath.Check
 
-      - name: Publish (NativeAOT, x64)
+      - name: Publish (NativeAOT, ${{ matrix.arch }})
         shell: pwsh
         run: |
           $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
-          dotnet publish windows/src/CloakDesk -c Release -r win-x64 -p:Platform=x64 -o out 2>&1 | Tee-Object publish.log
+          dotnet publish windows/src/CloakDesk -c Release -r win-${{ matrix.arch }} -p:Platform=${{ matrix.arch }} -o out-${{ matrix.arch }} 2>&1 | Tee-Object publish.log
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           Write-Host "---- interop and trimming warnings"
           Select-String -Path publish.log -Pattern 'warning (CsWinRT|IL\d|WMC|XLS)' | ForEach-Object { $_.Line } | Sort-Object -Unique
-          $size = (Get-ChildItem out -Recurse -File | Measure-Object Length -Sum).Sum
-          Write-Host ("---- publish size {0:N1} MB" -f ($size / 1MB))
+          $exe = Get-Item out-${{ matrix.arch }}/CloakDesk.exe
+          $size = (Get-ChildItem out-${{ matrix.arch }} -Recurse -File | Measure-Object Length -Sum).Sum
+          Write-Host ("---- version {0}, publish size {1:N1} MB" -f $exe.VersionInfo.ProductVersion, ($size / 1MB))
 
       - name: Build (Debug, JIT, console)
+        if: matrix.arch == 'x64'
         run: dotnet build windows/src/CloakDesk -c Debug -r win-x64 -p:Platform=x64 -p:OutputType=Exe -o debug
 
       - name: Install Windows App Runtime 1.8
+        if: matrix.arch == 'x64'
         shell: pwsh
         run: |
           Invoke-WebRequest https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe -OutFile war.exe
@@ -42,18 +57,20 @@ jobs:
 
       - name: Smoke test (Debug)
         id: smoke_debug
+        if: matrix.arch == 'x64'
         continue-on-error: true
         shell: pwsh
         run: ./windows/ci/smoke.ps1 -Exe debug/CloakDesk.exe -Out smoke -Name debug -Debugger
 
       - name: Smoke test (Release AOT)
         id: smoke_release
+        if: matrix.arch == 'x64'
         continue-on-error: true
         shell: pwsh
-        run: ./windows/ci/smoke.ps1 -Exe out/CloakDesk.exe -Out smoke -Name release -Debugger
+        run: ./windows/ci/smoke.ps1 -Exe out-x64/CloakDesk.exe -Out smoke -Name release -Debugger
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && matrix.arch == 'x64'
         with:
           name: smoke
           path: |
@@ -62,9 +79,9 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: CloakDesk-win-x64
-          path: out
+          name: CloakDesk-win-${{ matrix.arch }}
+          path: out-${{ matrix.arch }}
 
       - name: Fail if the app crashed
-        if: steps.smoke_debug.outcome != 'success' || steps.smoke_release.outcome != 'success'
+        if: matrix.arch == 'x64' && (steps.smoke_debug.outcome != 'success' || steps.smoke_release.outcome != 'success')
         run: exit 1

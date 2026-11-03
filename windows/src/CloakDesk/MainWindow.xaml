@@ -118,6 +118,9 @@
                                 <Button Click="OnOpenFolder" Content="Open folder" />
                             </local:SettingsRow>
 
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="About" />
+                            <local:SettingsRow x:Name="VersionRow" Glyph="&#xE946;" Header="Cloak Desk" />
+
                             <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="How it works" />
                             <local:SettingsRow Glyph="&#xE946;" Header="Share the Stage, not your screen"
                                                Description="When cloak is on, a window called “Cloak Desk Stage” mirrors your screen with curtains over hidden apps. Share that window in Teams, Zoom, Meet or OBS. Keep it behind your other windows or on another display. Cloak Desk itself never appears in a share." />

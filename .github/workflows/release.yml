@@ -1,0 +1,75 @@
+name: Release
+
+# Push an annotated SemVer tag (v1.2.3, v1.3.0-beta.1) to build, smoke-test and publish a release.
+# Release notes come from the matching "## [x.y.z]" section of CHANGELOG.md.
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/windows.yml
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version and notes
+        id: meta
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          if ($tag -notmatch '^v(\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?)$') { throw "Tag $tag is not SemVer (vX.Y.Z[-pre])" }
+          $version = $Matches[1]
+          $lines = Get-Content CHANGELOG.md
+          $start = ($lines | Select-String -Pattern "^## \[$([regex]::Escape($version))\]").LineNumber
+          if (-not $start) { throw "CHANGELOG.md has no '## [$version]' section" }
+          $rest = $lines[$start..($lines.Count - 1)]
+          $end = ($rest | Select-String -Pattern '^## \[').LineNumber | Select-Object -First 1
+          $notes = if ($end) { $rest[0..($end - 2)] } else { $rest }
+          ($notes -join "`n").Trim() | Set-Content notes.md
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "prerelease=$($version.Contains('-').ToString().ToLower())" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: CloakDesk-win-*
+
+      - name: Check the exe carries the tag version
+        shell: pwsh
+        run: |
+          foreach ($arch in 'x64', 'arm64') {
+            $v = (Get-Item "CloakDesk-win-$arch/CloakDesk.exe").VersionInfo.ProductVersion.Split('+')[0]
+            if ($v -ne '${{ steps.meta.outputs.version }}') { throw "$arch exe is $v, tag is ${{ steps.meta.outputs.version }}" }
+          }
+
+      - name: Build installers and zips
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress; }
+          $v = '${{ steps.meta.outputs.version }}'
+          New-Item -ItemType Directory -Force dist | Out-Null
+          foreach ($arch in 'x64', 'arm64') {
+            & $iscc /Qp "/DAppVersion=$v" "/DArch=$arch" "/DSourceDir=$PWD\CloakDesk-win-$arch" windows\installer\CloakDesk.iss
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            Move-Item "windows\installer\output\CloakDesk-Setup-$v-$arch.exe" dist\
+            Compress-Archive "CloakDesk-win-$arch\*" "dist\CloakDesk-$v-$arch-portable.zip"
+          }
+          $sums = Get-ChildItem dist -File | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName SHA256).Hash.ToLower(), $_.Name }
+          $sums | Set-Content dist\SHA256SUMS.txt
+          Get-Content dist\SHA256SUMS.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Cloak Desk ${{ steps.meta.outputs.version }}
+          body_path: notes.md
+          prerelease: ${{ steps.meta.outputs.prerelease }}
+          files: dist/*

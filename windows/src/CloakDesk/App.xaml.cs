@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -11,6 +12,10 @@ public partial class App : Application
     const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
 
     public static new App Current => (App)Application.Current;
+
+    /// SemVer from the git tag (MinVer), without the +commit build metadata.
+    public static string Version { get; } =
+        (typeof(App).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0").Split('+')[0];
 
     public PresetFile Presets { get; } = PresetFile.Load();
     public bool IsCloaked => _stage is not null;
