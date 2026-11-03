@@ -54,13 +54,11 @@
     <Content Include="Assets\*.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- No WebView, background tasks or non-English WinUI strings: don't ship them. -->
+  <!-- No WebView or background tasks here: don't ship their DLLs. WinUI's .mui string files must stay. -->
   <Target Name="DropUnusedRuntimeFiles" AfterTargets="ComputeResolvedFilesToPublishList">
     <ItemGroup>
       <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
         Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core' or '%(Filename)' == 'WebView2Loader' or '%(Filename)' == 'Microsoft.Windows.ApplicationModel.Background.UniversalBGTask'" />
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
-        Condition="'%(Extension)' == '.mui' and !$([System.String]::Copy('%(RelativePath)').StartsWith('en-US'))" />
     </ItemGroup>
   </Target>
 
