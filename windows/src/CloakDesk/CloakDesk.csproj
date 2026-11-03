@@ -43,7 +43,9 @@
 
   <ItemGroup>
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
+    <!-- WinUI component only (pulls Foundation + InteractiveExperiences). The Microsoft.WindowsAppSDK
+         metapackage would also bundle AI, ML (ONNX Runtime), Widgets and DWrite, which Cloak Desk never uses. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="1.8.260803003" />
     <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
     <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
   </ItemGroup>
@@ -52,12 +54,24 @@
     <Content Include="Assets\*.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- No WebView or background tasks here: don't ship their DLLs. -->
+  <!-- No WebView, background tasks or non-English WinUI strings: don't ship them. -->
   <Target Name="DropUnusedRuntimeFiles" AfterTargets="ComputeResolvedFilesToPublishList">
     <ItemGroup>
       <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
         Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core' or '%(Filename)' == 'WebView2Loader' or '%(Filename)' == 'Microsoft.Windows.ApplicationModel.Background.UniversalBGTask'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+        Condition="'%(Extension)' == '.mui' and !$([System.String]::Copy('%(RelativePath)').StartsWith('en-US'))" />
     </ItemGroup>
+  </Target>
+
+  <!-- Self-contained unpackaged publish leaves out the app's resource index and compiled XAML, so
+       LoadComponent fails with "XAML parsing failed". Copy them from the build output. -->
+  <Target Name="PublishXamlResources" AfterTargets="Publish">
+    <ItemGroup>
+      <_XamlResources Include="$(OutDir)$(TargetName).pri;$(OutDir)*.xbf" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_XamlResources)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+    <Error Condition="!Exists('$(PublishDir)$(TargetName).pri') or !Exists('$(PublishDir)MainWindow.xbf')" Text="Publish output is missing $(TargetName).pri or MainWindow.xbf" />
   </Target>
 
 </Project>

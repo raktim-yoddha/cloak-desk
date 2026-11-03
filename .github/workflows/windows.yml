@@ -42,7 +42,9 @@ jobs:
           Select-String -Path publish.log -Pattern 'warning (CsWinRT|IL\d|WMC|XLS)' | ForEach-Object { $_.Line } | Sort-Object -Unique
           $exe = Get-Item out-${{ matrix.arch }}/CloakDesk.exe
           $size = (Get-ChildItem out-${{ matrix.arch }} -Recurse -File | Measure-Object Length -Sum).Sum
-          Write-Host ("---- version {0}, publish size {1:N1} MB" -f $exe.VersionInfo.ProductVersion, ($size / 1MB))
+          $files = Get-ChildItem out-${{ matrix.arch }} -Recurse -File
+          Write-Host ("---- version {0}, {1} files, publish size {2:N1} MB" -f $exe.VersionInfo.ProductVersion, $files.Count, ($size / 1MB))
+          $files | Sort-Object Length -Descending | Select-Object -First 15 | ForEach-Object { "{0,8:N0} KB  {1}" -f ($_.Length / 1KB), $_.Name }
 
       - name: Build (Debug, JIT, console)
         if: matrix.arch == 'x64'
@@ -61,19 +63,6 @@ jobs:
         continue-on-error: true
         shell: pwsh
         run: ./windows/ci/smoke.ps1 -Exe out-x64/CloakDesk.exe -Out smoke -Name release -Debugger
-
-      - name: Diagnose (publish layout vs build, untrimmed publish)
-        if: matrix.arch == 'x64'
-        continue-on-error: true
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force smoke | Out-Null
-          $a = Get-ChildItem out-x64 -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path out-x64).Path.Length) }
-          $b = Get-ChildItem debug -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path debug).Path.Length) }
-          "== publish (AOT)"; $a | Sort-Object | Out-String
-          "== only in debug build (non-dll)"; Compare-Object $a $b | Where-Object SideIndicator -eq '=>' | ForEach-Object InputObject | Where-Object { $_ -notlike '*.dll' -and $_ -notlike '*.pdb' } | Out-String
-          dotnet publish windows/src/CloakDesk -c Release -r win-x64 -p:Platform=x64 -p:PublishAot=false -p:PublishTrimmed=false --self-contained -o out-jit | Out-Null
-          ./windows/ci/smoke.ps1 -Exe out-jit/CloakDesk.exe -Out smoke -Name release-jit -Seconds 10
 
       - name: End-to-end test (Release AOT)
         id: e2e
