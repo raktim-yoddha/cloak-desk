@@ -5,14 +5,14 @@ WinUI 3 app in C# (.NET 10, NativeAOT), unpackaged. Needs Windows 10 2004 or lat
 ## Install
 
 Download `CloakDesk-Setup-<version>-x64.exe` (or `-arm64`) from [Releases](https://github.com/raktim-yoddha/cloak-desk/releases) and run it.
-It installs for your user only (no admin prompt) and adds the Windows App Runtime 1.8 if it isn't there.
-Prefer no installer? Use the `-portable.zip` and install the [Windows App Runtime 1.8](https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe) yourself.
+It installs for your user only (no admin prompt). Nothing else is needed: the Windows App SDK runtime is bundled.
+Prefer no installer? Unzip the `-portable.zip` anywhere and run `CloakDesk.exe`.
 
 Silent install: `CloakDesk-Setup-<version>-x64.exe /VERYSILENT /TASKS="startup"`.
 
 ## Build
 
-Requirements: .NET 10 SDK, Visual Studio 2022 with "Desktop development with C++" (NativeAOT links with it), Windows App Runtime 1.8.
+Requirements: .NET 10 SDK, Visual Studio 2022 with "Desktop development with C++" (NativeAOT links with it).
 
 ```powershell
 dotnet run --project windows/tests/CurtainMath.Check          # curtain logic checks

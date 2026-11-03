@@ -48,13 +48,6 @@ jobs:
         if: matrix.arch == 'x64'
         run: dotnet build windows/src/CloakDesk -c Debug -r win-x64 -p:Platform=x64 -p:OutputType=Exe -o debug
 
-      - name: Install Windows App Runtime 1.8
-        if: matrix.arch == 'x64'
-        shell: pwsh
-        run: |
-          Invoke-WebRequest https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe -OutFile war.exe
-          Start-Process .\war.exe -ArgumentList '--quiet', '--force' -Wait
-
       - name: Smoke test (Debug)
         id: smoke_debug
         if: matrix.arch == 'x64'

@@ -1,7 +1,7 @@
 ; Cloak Desk installer (Inno Setup 6).
 ; Build: iscc /DAppVersion=1.2.3 /DArch=x64 /DSourceDir=..\..\out-x64 CloakDesk.iss
 ; Output: CloakDesk-Setup-<version>-<arch>.exe
-; Per-user install, no admin prompt. Installs the Windows App Runtime 1.8 only if it is missing.
+; Per-user install, no admin prompt. The app is self-contained (Windows App SDK runtime included).
 
 #ifndef AppVersion
   #error Pass /DAppVersion=X.Y.Z
@@ -12,7 +12,6 @@
 #ifndef SourceDir
   #define SourceDir "..\..\out-" + Arch
 #endif
-#define RuntimeUrl "https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-" + Arch + ".exe"
 ; Numeric part only (1.2.3 of 1.2.3-beta.1) for the Windows file version.
 #define NumericVersion Copy(AppVersion, 1, Pos("-", AppVersion + "-") - 1)
 
@@ -72,39 +71,12 @@ Name: "{autodesktop}\Cloak Desk"; Filename: "{app}\CloakDesk.exe"; Tasks: deskto
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "CloakDesk"; ValueData: """{app}\CloakDesk.exe"" --tray"; Tasks: startup
 
 [Run]
-Filename: "{tmp}\windowsappruntimeinstall.exe"; Parameters: "--quiet"; StatusMsg: "Installing Windows App Runtime 1.8..."; Flags: waituntilterminated; Check: RuntimeDownloaded
 Filename: "{app}\CloakDesk.exe"; Description: "{cm:LaunchProgram,Cloak Desk}"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
 Filename: "{sys}\taskkill.exe"; Parameters: "/F /IM CloakDesk.exe"; Flags: runhidden; RunOnceId: "StopCloakDesk"
 
 [Code]
-function RuntimeInstalled: Boolean;
-var
-  Code: Integer;
-begin
-  Result := Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
-    '-NoProfile -NonInteractive -Command "if (Get-AppxPackage -Name ''Microsoft.WindowsAppRuntime.1.8'') { exit 0 } else { exit 1 }"',
-    '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0);
-end;
-
-function RuntimeDownloaded: Boolean;
-begin
-  Result := FileExists(ExpandConstant('{tmp}\windowsappruntimeinstall.exe'));
-end;
-
-// Runs in normal and silent installs. Returning text stops setup and shows it.
-function PrepareToInstall(var NeedsRestart: Boolean): String;
-begin
-  Result := '';
-  if RuntimeInstalled then Exit;
-  try
-    DownloadTemporaryFile('{#RuntimeUrl}', 'windowsappruntimeinstall.exe', '', nil);
-  except
-    Result := 'Cloak Desk needs the Windows App Runtime 1.8, and it couldn''t be downloaded: ' + GetExceptionMessage;
-  end;
-end;
-
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   // Remove the autostart value whether the installer or the app's own switch created it. Presets stay.

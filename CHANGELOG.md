@@ -12,10 +12,11 @@ The release workflow publishes the section that matches the pushed tag as the re
 - Notification-area icon and menu, start with Windows, single instance.
 - Cloak Desk's own windows are excluded from every screen capture.
 - Version shown in Settings > About.
-- Setup (`CloakDesk-Setup-<version>-<arch>.exe`) for x64 and ARM64: per-user, no admin, installs the Windows App Runtime 1.8 if missing.
+- Setup (`CloakDesk-Setup-<version>-<arch>.exe`) for x64 and ARM64: per-user, no admin, nothing else to install.
 - Portable zips and SHA256 checksums on every release.
 
 ### Fixed
+- App never started on PCs without the exact Windows App Runtime version ("Required components are missing" dialog): the runtime is now bundled.
 - Launch crash (`E_NOINTERFACE`) under NativeAOT: presets are now exposed to XAML as proper WinRT types.
 - `crash.log` was never written on first run.
 - Screen-capture errors no longer close the app; a failed Stage start releases the GPU device.

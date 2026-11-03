@@ -15,7 +15,9 @@
 
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType>None</WindowsPackageType>
-    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+    <!-- Ship the Windows App SDK runtime with the app: no separately installed runtime, so no
+         "Required components of the Windows App Runtime are missing" dialog or version mismatch. -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 
     <!-- Small, fast: one native exe, no .NET runtime to install. -->
     <PublishAot>true</PublishAot>

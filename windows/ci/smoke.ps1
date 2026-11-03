@@ -23,9 +23,12 @@ $bmp = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
 [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
 $bmp.Save("$Out\$Name-screen.png")
 
-$alive = -not $p.HasExited
+$crashed = $p.HasExited
+$alive = -not $crashed
 if ($alive) {
     $p.Refresh() # Process caches its counters from the first read
+    # Alive is not enough: a startup error dialog keeps the process alive too. Require the main window.
+    if ($p.MainWindowTitle -ne 'Cloak Desk') { Write-Host "[$Name] running but main window is '$($p.MainWindowTitle)'"; $alive = $false }
     Write-Host "[$Name] still running after $Seconds s, memory $([math]::Round($p.PrivateMemorySize64 / 1MB, 1)) MB private"
     Stop-Process -Id $p.Id -Force
 } else {
@@ -38,7 +41,7 @@ Get-WinEvent -FilterHashtable @{ LogName = 'Application'; StartTime = $started }
     ForEach-Object { "---- $($_.ProviderName) $($_.TimeCreated)`n$($_.Message)" } |
     Tee-Object "$Out\$Name-events.txt"
 
-if (-not $alive -and $Debugger) {
+if ($crashed -and $Debugger) {
     # Run again under cdb and dump the stowed exception and stacks at the crash.
     $cdb = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($cdb) {
