@@ -170,7 +170,7 @@ Step 'Ctrl+Alt+H' {
 Step 'Presets' {
     [W]::SetForegroundWindow([W]::Find($app.Id, 'Cloak Desk')) | Out-Null
     Click (El 'name' 'New preset')
-    Check 'New preset is saved and selected' (WaitFor { $p = Presets; $p.presets.Count -eq 2 -and $p.active -eq 1 } 10)
+    Check 'New preset is saved and selected' (WaitFor { $p = Presets; $p.presets.Count -eq 2 -and $p.active -eq 1 -and $p.presets[1].name -eq 'Preset 2' } 10)
     (Pattern (El 'id' 'NameBox') ([System.Windows.Automation.ValuePattern]::Pattern)).SetValue('Work')
     Check 'Renaming saves the name' (WaitFor { (Presets).presets[1].name -eq 'Work' } 10)
     Check 'Renamed preset shows in the navigation' (WaitFor { El 'name' 'Work' } 5)

@@ -19,6 +19,7 @@ public sealed partial class MainWindow : Window
     // SettingsItem is null until the NavigationView loads; null == null must not count as "on settings".
     bool OnSettings => Nav.SettingsItem is { } settings && Nav.SelectedItem == settings;
     Preset? _loaded; // preset whose values the page currently shows
+    long _lastNewPreset;
 
     public MainWindow()
     {
@@ -113,7 +114,14 @@ public sealed partial class MainWindow : Window
     void OnNavInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         if (args.InvokedItemContainer != NewPresetItem) return;
-        _app.Presets.Presets.Add(new Preset());
+        // One invoke of a footer item can raise ItemInvoked twice (seen with UI Automation); add one preset.
+        long now = Environment.TickCount64;
+        if (now - _lastNewPreset < 500) return;
+        _lastNewPreset = now;
+        var presets = _app.Presets.Presets;
+        int n = presets.Count + 1;
+        while (presets.Any(p => p.Name == $"Preset {n}")) n++;
+        presets.Add(new Preset { Name = $"Preset {n}" });
         _app.SelectPreset(_app.Presets.Presets.Count - 1);
     }
 

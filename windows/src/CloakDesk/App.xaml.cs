@@ -63,7 +63,19 @@ public partial class App : Application
         var ui = DispatcherQueue.GetForCurrentThread();
         main.Activated += (_, _) => ui.TryEnqueue(ShowWindow);
         _tray = new Tray(this);
+        _ = RequestBorderlessCaptureAsync();
         if (!Environment.GetCommandLineArgs().Contains("--tray")) ShowWindow();
+    }
+
+    /// Without this, Windows 11 draws a yellow border around the whole screen while the Stage captures.
+    static async Task RequestBorderlessCaptureAsync()
+    {
+        try
+        {
+            if (Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.Graphics.Capture.GraphicsCaptureAccess"))
+                await Windows.Graphics.Capture.GraphicsCaptureAccess.RequestAccessAsync(Windows.Graphics.Capture.GraphicsCaptureAccessKind.Borderless);
+        }
+        catch (Exception e) { System.Diagnostics.Debug.WriteLine(e); } // older Windows: the border just stays
     }
 
     public void ShowWindow()
