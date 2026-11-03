@@ -12,6 +12,8 @@ permissions:
 jobs:
   build:
     uses: ./.github/workflows/windows.yml
+    permissions:
+      contents: write
 
   release:
     needs: build

@@ -25,6 +25,7 @@ $bmp.Save("$Out\$Name-screen.png")
 
 $alive = -not $p.HasExited
 if ($alive) {
+    $p.Refresh() # Process caches its counters from the first read
     Write-Host "[$Name] still running after $Seconds s, memory $([math]::Round($p.PrivateMemorySize64 / 1MB, 1)) MB private"
     Stop-Process -Id $p.Id -Force
 } else {

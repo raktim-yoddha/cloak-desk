@@ -10,7 +10,7 @@ on:
   workflow_call: # release.yml runs the same build and smoke test before packaging
 
 permissions:
-  contents: read
+  contents: write # only to push test screenshots to the ci-artifacts branch
 
 jobs:
   build:
@@ -69,13 +69,35 @@ jobs:
         shell: pwsh
         run: ./windows/ci/smoke.ps1 -Exe out-x64/CloakDesk.exe -Out smoke -Name release -Debugger
 
+      - name: End-to-end test (Release AOT)
+        id: e2e
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        shell: powershell
+        run: ./windows/ci/e2e.ps1 -Exe out-x64/CloakDesk.exe -Out e2e
+
       - uses: actions/upload-artifact@v4
         if: always() && matrix.arch == 'x64'
         with:
           name: smoke
           path: |
             smoke
+            e2e
             publish.log
+
+      # Screenshots and results on a throwaway branch, readable with plain git (latest branch run only).
+      - name: Publish test results to the ci-artifacts branch
+        if: always() && matrix.arch == 'x64' && github.ref_type == 'branch' && github.event_name == 'push'
+        shell: pwsh
+        run: |
+          $dst = Join-Path $env:RUNNER_TEMP ci
+          New-Item -ItemType Directory -Force $dst | Out-Null
+          foreach ($d in 'smoke', 'e2e') { if (Test-Path $d) { Copy-Item $d $dst -Recurse } }
+          if (Test-Path publish.log) { Copy-Item publish.log $dst }
+          Set-Location $dst
+          git init -q; git checkout -q -b ci-artifacts; git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Run ${{ github.run_id }} on ${{ github.ref_name }} @ ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-artifacts
 
       - uses: actions/upload-artifact@v4
         with:
@@ -83,5 +105,5 @@ jobs:
           path: out-${{ matrix.arch }}
 
       - name: Fail if the app crashed
-        if: matrix.arch == 'x64' && (steps.smoke_debug.outcome != 'success' || steps.smoke_release.outcome != 'success')
+        if: matrix.arch == 'x64' && (steps.smoke_debug.outcome != 'success' || steps.smoke_release.outcome != 'success' || steps.e2e.outcome != 'success')
         run: exit 1
