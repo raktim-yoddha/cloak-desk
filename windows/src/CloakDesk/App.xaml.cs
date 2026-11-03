@@ -25,12 +25,21 @@ public partial class App : Application
 
     public App()
     {
+        AppDomain.CurrentDomain.UnhandledException += (_, e) => LogCrash(e.ExceptionObject); // capture thread, tray callbacks
         InitializeComponent();
-        UnhandledException += (_, e) =>
+        UnhandledException += (_, e) => LogCrash(e.Exception);
+    }
+
+    /// Appends to %LOCALAPPDATA%\CloakDesk\crash.log. The folder may not exist yet on first run.
+    static void LogCrash(object exception)
+    {
+        try
         {
-            try { File.AppendAllText(Path.Combine(Path.GetDirectoryName(PresetFile.FilePath)!, "crash.log"), $"{DateTime.Now:O}\n{e.Exception}\n\n"); }
-            catch (IOException) { }
-        };
+            var dir = Path.GetDirectoryName(PresetFile.FilePath)!;
+            Directory.CreateDirectory(dir);
+            File.AppendAllText(Path.Combine(dir, "crash.log"), $"{DateTime.Now:O}\n{exception}\n\n");
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)

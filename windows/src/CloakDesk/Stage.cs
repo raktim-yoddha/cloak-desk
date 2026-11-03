@@ -137,6 +137,14 @@ sealed unsafe class Stage : IDisposable
         }
         catch
         {
+            // Release whatever got created before the failure, so a failed start doesn't leak a D3D device.
+            _session?.Dispose();
+            _pool?.Dispose();
+            _d2d?.Dispose();
+            _swap?.Dispose();
+            _winrtDevice?.Dispose();
+            _context?.Dispose();
+            _device?.Dispose();
             if (_hwnd != 0) Native.DestroyWindow(_hwnd);
             _self.Free();
             throw;
@@ -171,7 +179,7 @@ sealed unsafe class Stage : IDisposable
                 Render(frame);
             }
             // ponytail: a lost device (driver update, GPU reset) just drops frames; toggling the cloak recovers.
-            catch (SharpGenException e) { Debug.WriteLine(e); }
+            catch (Exception e) when (e is SharpGenException or COMException) { Debug.WriteLine(e); }
         }
     }
 

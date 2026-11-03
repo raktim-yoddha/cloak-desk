@@ -24,6 +24,9 @@
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Level 2 also flags non-partial classes implementing mapped .NET interfaces (INotifyPropertyChanged),
+         which otherwise build clean and fail at runtime with E_NOINTERFACE under NativeAOT. -->
+    <CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
     <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
   </PropertyGroup>
 

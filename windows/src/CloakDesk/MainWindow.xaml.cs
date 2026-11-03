@@ -164,7 +164,11 @@ public sealed partial class MainWindow : Window
         foreach (var p in Process.GetProcesses())
         {
             using (p)
-                if (p.MainWindowHandle != 0 && p.Id != Environment.ProcessId) names.Add(p.ProcessName.ToLowerInvariant());
+            {
+                // A process can exit mid-enumeration; skip it instead of crashing the picker.
+                try { if (p.MainWindowHandle != 0 && p.Id != Environment.ProcessId) names.Add(p.ProcessName.ToLowerInvariant()); }
+                catch (InvalidOperationException) { }
+            }
         }
         AppPicker.ItemsSource = names.ToList();
     }
