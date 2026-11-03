@@ -62,6 +62,19 @@ jobs:
         shell: pwsh
         run: ./windows/ci/smoke.ps1 -Exe out-x64/CloakDesk.exe -Out smoke -Name release -Debugger
 
+      - name: Diagnose (publish layout vs build, untrimmed publish)
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force smoke | Out-Null
+          $a = Get-ChildItem out-x64 -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path out-x64).Path.Length) }
+          $b = Get-ChildItem debug -Recurse -File | ForEach-Object { $_.FullName.Substring((Resolve-Path debug).Path.Length) }
+          "== publish (AOT)"; $a | Sort-Object | Out-String
+          "== only in debug build (non-dll)"; Compare-Object $a $b | Where-Object SideIndicator -eq '=>' | ForEach-Object InputObject | Where-Object { $_ -notlike '*.dll' -and $_ -notlike '*.pdb' } | Out-String
+          dotnet publish windows/src/CloakDesk -c Release -r win-x64 -p:Platform=x64 -p:PublishAot=false -p:PublishTrimmed=false --self-contained -o out-jit | Out-Null
+          ./windows/ci/smoke.ps1 -Exe out-jit/CloakDesk.exe -Out smoke -Name release-jit -Seconds 10
+
       - name: End-to-end test (Release AOT)
         id: e2e
         if: matrix.arch == 'x64'
