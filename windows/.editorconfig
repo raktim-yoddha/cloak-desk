@@ -1,3 +1,0 @@
-[*.cs]
-# Stage and Tray implement IDisposable but are never passed to WinRT, so CsWinRT1028 does not apply to them.
-cswinrt_aot_warning_suppressed_interfaces = System.IDisposable

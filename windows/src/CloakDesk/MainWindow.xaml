@@ -19,15 +19,6 @@
         <NavigationView x:Name="Nav" Grid.Row="1" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="False"
                         IsSettingsVisible="True" OpenPaneLength="280" PaneDisplayMode="Left"
                         ItemInvoked="OnNavInvoked" SelectionChanged="OnNavSelected">
-            <NavigationView.MenuItemTemplate>
-                <DataTemplate x:DataType="local:Preset">
-                    <NavigationViewItem Content="{x:Bind Name, Mode=OneWay}">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE72E;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                </DataTemplate>
-            </NavigationView.MenuItemTemplate>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem x:Name="NewPresetItem" Content="New preset" SelectsOnInvoked="False">
                     <NavigationViewItem.Icon>

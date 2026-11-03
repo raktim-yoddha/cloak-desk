@@ -17,6 +17,7 @@ public sealed partial class MainWindow : Window
 
     Preset CurrentPreset => _app.Presets.Current;
     bool OnSettings => Nav.SelectedItem == Nav.SettingsItem;
+    Preset? _loaded; // preset whose values the page currently shows
 
     public MainWindow()
     {
@@ -43,7 +44,6 @@ public sealed partial class MainWindow : Window
             presenter.PreferredMinimumHeight = (int)(480 * scale);
         }
 
-        Nav.MenuItemsSource = _app.Presets.Presets;
         StartupSwitch.IsOn = App.StartWithWindows;
         HotkeyRow.Description = _app.Tray.HotkeyError ?? "Work in any app";
         PresetsFileRow.Description = PresetFile.FilePath;
@@ -55,7 +55,7 @@ public sealed partial class MainWindow : Window
 
     void Refresh()
     {
-        if (!OnSettings && Nav.SelectedItem != CurrentPreset) Nav.SelectedItem = CurrentPreset;
+        SyncNav();
         CloakSwitch.IsOn = _app.IsCloaked;
         CloakRow.Description = _app.IsCloaked
             ? "On. Share the “Cloak Desk Stage” window in your meeting or stream app."
@@ -67,9 +67,28 @@ public sealed partial class MainWindow : Window
         if (!OnSettings) PageTitle.Text = CurrentPreset.Name;
     }
 
+    /// One NavigationViewItem per preset, built in code: data-templating Preset objects into the
+    /// NavigationView goes through WinRT object marshaling, which failed at runtime (Debug and NativeAOT).
+    void SyncNav()
+    {
+        var presets = _app.Presets.Presets;
+        var items = Nav.MenuItems;
+        while (items.Count > presets.Count) items.RemoveAt(items.Count - 1);
+        for (int i = 0; i < presets.Count; i++)
+        {
+            if (i < items.Count) ((NavigationViewItem)items[i]).Content = presets[i].Name;
+            else items.Add(new NavigationViewItem { Content = presets[i].Name, Tag = i, Icon = new FontIcon { Glyph = "\uE72E" } });
+        }
+        if (OnSettings) return;
+        var selected = items[Math.Clamp(_app.Presets.Active, 0, items.Count - 1)];
+        if (Nav.SelectedItem != selected) Nav.SelectedItem = selected; // OnNavSelected loads it
+        if (_loaded != CurrentPreset) LoadPreset(); // same slot, different preset (after a delete)
+    }
+
     void LoadPreset()
     {
         var p = CurrentPreset;
+        _loaded = p;
         PageTitle.Text = p.Name;
         NameBox.Text = p.Name;
         var (r, g, b) = p.Rgb();
@@ -102,8 +121,7 @@ public sealed partial class MainWindow : Window
         PresetPage.Visibility = args.IsSettingsSelected ? Visibility.Collapsed : Visibility.Visible;
         SettingsPage.Visibility = args.IsSettingsSelected ? Visibility.Visible : Visibility.Collapsed;
         if (args.IsSettingsSelected) { PageTitle.Text = "Settings"; return; }
-        if (args.SelectedItem is not Preset preset) return;
-        int i = _app.Presets.Presets.IndexOf(preset);
+        if (args.SelectedItemContainer is not NavigationViewItem { Tag: int i }) return;
         if (i != _app.Presets.Active) _app.SelectPreset(i);
         LoadPreset();
     }

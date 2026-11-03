@@ -53,7 +53,7 @@ sealed record Look(HashSet<string> Apps, bool Desktop, Color4 Color, Look.Pictur
 
 /// Captures the primary monitor, paints curtains over cloaked windows, shows it in the "Cloak Desk Stage"
 /// window that the user shares. All GPU: one texture copy + rectangle fills per frame.
-sealed unsafe class Stage : IDisposable
+sealed unsafe partial class Stage : IDisposable
 {
     const int Pad = 6; // curtain margin so a fast-dragged window doesn't leak an edge for a frame
     const DirectXPixelFormat CaptureFormat = DirectXPixelFormat.B8G8R8A8UIntNormalized;

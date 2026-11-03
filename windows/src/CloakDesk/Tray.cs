@@ -1,7 +1,7 @@
 namespace CloakDesk;
 
 /// Notification-area icon, its menu, and the global hotkeys. Owns one hidden Win32 window.
-public sealed unsafe class Tray : IDisposable
+public sealed unsafe partial class Tray : IDisposable
 {
     const uint CallbackMessage = Native.WM_APP + 1;
     const uint NIM_ADD = 0, NIM_MODIFY = 1, NIM_DELETE = 2, NIF_MESSAGE = 1, NIF_ICON = 2, NIF_TIP = 4;
