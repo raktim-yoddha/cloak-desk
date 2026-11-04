@@ -201,8 +201,14 @@ h3 {
 
 .row .sample {
   flex: none;
+  max-width: 160px;
+  overflow: hidden;
   font-size: 11.5px;
   color: var(--fg-3);
+}
+
+.row .sample .cover {
+  inset: 1px 0; /* stays inside the clipped example, so its rounded ends show */
 }
 
 /* radio rows */
@@ -487,12 +493,8 @@ code {
 /* ---------- first run ---------- */
 
 .welcome {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 270px;
-  gap: 40px;
-  align-items: center;
   margin-bottom: 104px;
-  padding: 40px 36px 36px;
+  padding: 40px 40px 36px;
 }
 
 .welcome p {
@@ -518,14 +520,16 @@ code {
 }
 
 .welcome-viewer {
-  display: grid;
-  justify-items: start;
-  gap: 4px;
-  padding: 16px 18px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+  margin-top: 28px;
+  padding: 16px 20px;
 }
 
 .welcome-viewer .viewer-label {
-  margin-bottom: 4px;
+  width: 100%;
   color: var(--fg-3);
   font-size: 11.5px;
 }
@@ -568,10 +572,6 @@ code {
 
   .main {
     padding: 32px 16px 80px;
-  }
-
-  .welcome {
-    grid-template-columns: 1fr;
   }
 
   .form-demo {

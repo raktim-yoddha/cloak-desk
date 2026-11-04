@@ -33,18 +33,18 @@
           <div class="welcome-text">
             <h1>Hide what viewers shouldn't see</h1>
             <p>Covers emails, phone numbers, cards, IDs and API keys on every page while you share your screen. You see the covers too.</p>
+            <div class="well welcome-viewer" id="welcomeViewer" aria-label="Preview of what viewers see">
+              <span class="viewer-label">Viewers see</span>
+              <span class="sample">raktim.yoddha@gmail.com<i class="cover"></i></span>
+              <span class="sample">+91 98765 43210<i class="cover"></i></span>
+              <span class="sample">4111 1111 1111 1111<i class="cover"></i></span>
+              <span class="sample">ghp_8fK2xQ9mVt7Lr1ZsP0<i class="cover"></i></span>
+            </div>
             <div class="actions">
               <button class="btn btn-primary" id="welcomeEnable">Turn on protection</button>
               <a class="btn btn-quiet" href="#appearance">See an example</a>
             </div>
             <p class="hint">Pin it from the puzzle icon in the toolbar.</p>
-          </div>
-          <div class="well welcome-viewer" id="welcomeViewer" aria-label="Preview of what viewers see">
-            <span class="viewer-label">Viewers see</span>
-            <span class="sample">raktim.yoddha@gmail.com<i class="cover"></i></span>
-            <span class="sample">+91 98765 43210<i class="cover"></i></span>
-            <span class="sample">4111 1111 1111 1111<i class="cover"></i></span>
-            <span class="sample">ghp_8fK2xQ9mVt7Lr1ZsP0<i class="cover"></i></span>
           </div>
         </section>
 
@@ -97,7 +97,7 @@
           <h2>Your words</h2>
           <p class="lead">Names, addresses, anything personal. Any letter case.</p>
           <div class="tags" id="wordsTags"><input id="wordsInput" placeholder="Add a word or phrase, then press Enter" autocomplete="off" spellcheck="false" aria-label="Add a word or phrase" /></div>
-          <p class="hint">Or select text on a page, right-click, Always hide.</p>
+          <p class="hint">Or right-click selected text and choose Always hide.</p>
           <details class="disclosure">
             <summary>Patterns</summary>
             <div class="tags" id="patternsTags"><input id="patternsInput" placeholder="/EMP-\d{5}/" autocomplete="off" spellcheck="false" aria-label="Add a pattern" /></div>
