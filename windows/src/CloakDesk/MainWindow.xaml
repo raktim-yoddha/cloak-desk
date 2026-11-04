@@ -36,7 +36,7 @@
                         <!-- Preset page -->
                         <StackPanel x:Name="PresetPage" Spacing="4">
                             <local:SettingsRow x:Name="CloakRow" Glyph="&#xED1A;" Header="Cloak">
-                                <ToggleSwitch x:Name="CloakSwitch" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnCloakToggled" />
+                                <ToggleSwitch x:Name="CloakSwitch" Margin="0,-4" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnCloakToggled" />
                             </local:SettingsRow>
                             <InfoBar x:Name="ErrorBar" IsClosable="False" Severity="Error" />
 
@@ -61,7 +61,7 @@
                                 </StackPanel>
                             </local:SettingsRow>
                             <local:SettingsRow Glyph="&#xE7F4;" Header="Hide desktop" Description="Wallpaper, desktop icons and taskbar">
-                                <ToggleSwitch x:Name="DesktopSwitch" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnDesktopToggled" />
+                                <ToggleSwitch x:Name="DesktopSwitch" Margin="0,-4" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnDesktopToggled" />
                             </local:SettingsRow>
 
                             <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Hidden apps" />
@@ -97,7 +97,7 @@
                         <StackPanel x:Name="SettingsPage" Spacing="4" Visibility="Collapsed">
                             <TextBlock Style="{StaticResource SectionHeaderStyle}" Margin="1,0,0,6" Text="General" />
                             <local:SettingsRow Glyph="&#xE7E8;" Header="Start with Windows" Description="Cloak Desk starts in the notification area">
-                                <ToggleSwitch x:Name="StartupSwitch" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnStartupToggled" />
+                                <ToggleSwitch x:Name="StartupSwitch" Margin="0,-4" MinWidth="0" OffContent="Off" OnContent="On" Toggled="OnStartupToggled" />
                             </local:SettingsRow>
                             <local:SettingsRow Glyph="&#xE765;" Header="Keyboard shortcuts" x:Name="HotkeyRow">
                                 <StackPanel Spacing="4">
