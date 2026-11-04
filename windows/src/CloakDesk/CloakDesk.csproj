@@ -48,6 +48,9 @@
     <!-- WinUI component only (pulls Foundation + InteractiveExperiences). The Microsoft.WindowsAppSDK
          metapackage would also bundle AI, ML (ONNX Runtime), Widgets and DWrite, which Cloak Desk never uses. -->
     <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="1.8.260803003" />
+    <!-- Framework-dependent: the runtime this WinUI build pairs with (both from Windows App SDK 1.8.260804001).
+         Tells the bootstrapper which Windows App Runtime 1.8 version is the minimum. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="1.8.260804001" />
     <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
     <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
   </ItemGroup>
