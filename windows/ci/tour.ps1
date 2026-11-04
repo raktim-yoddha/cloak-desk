@@ -86,7 +86,7 @@ $wallpaper = Join-Path $Out 'sample-wallpaper.png'
 $bmp = New-Object System.Drawing.Bitmap 1600, 900
 $g = [System.Drawing.Graphics]::FromImage($bmp)
 $g.SmoothingMode = 'AntiAlias'; $g.TextRenderingHint = 'AntiAliasGridFit'
-$brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush((New-Object System.Drawing.Point 0, 0), (New-Object System.Drawing.Point 1600, 900), [System.Drawing.Color]::FromArgb(255, 30, 58, 138), [System.Drawing.Color]::FromArgb(255, 124, 58, 237))
+$brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush((New-Object System.Drawing.Point 0, 0), (New-Object System.Drawing.Point 1600, 900), [System.Drawing.Color]::FromArgb(255, 17, 17, 19), [System.Drawing.Color]::FromArgb(255, 58, 58, 64))
 $g.FillRectangle($brush, 0, 0, 1600, 900)
 $font = New-Object System.Drawing.Font('Segoe UI Semibold', 96)
 $small = New-Object System.Drawing.Font('Segoe UI', 40)
@@ -103,26 +103,26 @@ New-Item -ItemType Directory -Force $dataDir | Out-Null
 @{
     active  = 0
     presets = @(
-        @{ name = 'Work meeting'; apps = @('notepad'); desktop = $false; color = '#1F2937'; image = $wallpaper },
-        @{ name = 'Streaming'; apps = @('notepad'); desktop = $true; color = '#4C1D95'; image = $null }
+        @{ name = 'Work meeting'; apps = @('notepad'); desktop = $false; color = '#18181B'; image = $wallpaper },
+        @{ name = 'Streaming'; apps = @('notepad'); desktop = $true; color = '#2A2A2E'; image = $null }
     )
 } | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $dataDir 'presets.json') -Encoding UTF8
 
-# ---- Light theme ----
+# ---- Windows set to light mode: Cloak Desk stays dark ----
 Launch $false
-WindowShot '01-light-preset-with-wallpaper-curtain'
+WindowShot '01-preset-with-image-curtain'
 
 Click (El 'name' 'Curtain color')
-WindowShot '02-light-curtain-color-picker' 40
+WindowShot '02-curtain-color-picker' 40
 [T]::Key(0x1B); Start-Sleep -Milliseconds 500
 
 $picker = El 'id' 'AppPicker'
 $picker.GetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern).Expand()
-WindowShot '03-light-hide-an-app-picker' 40
+WindowShot '03-hide-an-app-picker' 40
 [T]::Key(0x1B); Start-Sleep -Milliseconds 500
 
 Click (El 'name' 'Settings')
-WindowShot '04-light-settings'
+WindowShot '04-settings'
 Click (El 'name' 'Work meeting')
 Start-Sleep -Seconds 1
 
@@ -137,7 +137,7 @@ Shot '05-your-screen-notepad-is-private'
 [T]::SetForegroundWindow([T]::Find($app.Id, 'Cloak Desk')) | Out-Null
 Toggle (El 'id' 'CloakSwitch')
 for ($i = 0; $i -lt 30 -and ([T]::Find($app.Id, 'Cloak Desk Stage') -eq [IntPtr]::Zero); $i++) { Start-Sleep -Milliseconds 500 }
-WindowShot '06-light-cloak-on'
+WindowShot '06-cloak-on'
 $stage = [T]::Find($app.Id, 'Cloak Desk Stage')
 [T]::SetForegroundWindow($np.MainWindowHandle) | Out-Null
 Start-Sleep -Seconds 1
@@ -169,12 +169,6 @@ Start-Sleep -Milliseconds 500; [T]::Key(0x1B)
 [T]::SetForegroundWindow([T]::Find($app.Id, 'Cloak Desk')) | Out-Null
 $sw = El 'id' 'CloakSwitch'; if ($sw) { Toggle $sw }
 Stop-Process -Id $np.Id -Force -ErrorAction SilentlyContinue
-
-# ---- Dark theme ----
-Launch $true
-WindowShot '10-dark-preset'
-Click (El 'name' 'Settings')
-WindowShot '11-dark-settings'
 
 Get-Process CloakDesk -ErrorAction SilentlyContinue | Stop-Process -Force
 Set-ItemProperty $personalize -Name AppsUseLightTheme -Value 1 -Type DWord

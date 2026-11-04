@@ -6,14 +6,13 @@
     xmlns:local="using:CloakDesk"
     Title="Cloak Desk">
 
-    <Grid x:Name="Root">
+    <Grid x:Name="Root" Background="{ThemeResource AppBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TitleBar x:Name="AppTitleBar" Title="Cloak Desk" Background="{ThemeResource GlassBarBrush}"
-                  BorderBrush="{ThemeResource GlassEdgeBrush}" BorderThickness="0,1,0,0"
+        <TitleBar x:Name="AppTitleBar" Title="Cloak Desk" Background="Transparent"
                   IsBackButtonVisible="False" IsPaneToggleButtonVisible="True" PaneToggleRequested="OnPaneToggle" />
 
         <NavigationView x:Name="Nav" Grid.Row="1" IsBackButtonVisible="Collapsed" IsPaneToggleButtonVisible="False"

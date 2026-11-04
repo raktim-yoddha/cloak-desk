@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.UI;
-using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -24,9 +23,6 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        if (MicaController.IsSupported()) SystemBackdrop = new GrayBackdrop();
-        else Root.Background = new SolidColorBrush((Color)Application.Current.Resources["GrayColor"]);
-
         var icon = Path.Combine(AppContext.BaseDirectory, "Assets", "CloakDesk.ico");
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);

@@ -7,6 +7,9 @@ The release workflow publishes the section that matches the pushed tag as the re
 
 ## [Unreleased]
 
+### Changed
+- Windows: dark interface with silver accents, matching the browser extension. Near-black window instead of gray Mica, silver in place of the Windows accent color, quieter settings rows, new black-and-silver app and tray icons (curtain open when off, closed while cloaking).
+
 ### Added
 - **Cloak Desk Browser Safety**, a Chromium extension (Chrome, Edge, Brave) in `chromium/`. It hides emails, phone numbers, payment cards, IBANs, Aadhaar/PAN/SSN/NI numbers, API keys, tokens and passwords, IP addresses, crypto wallets and your own words on every web page while you stream or share. Checksums (Luhn, mod-97, Verhoeff) keep false alarms down.
 - Off after install; turn it on from the toolbar, the welcome page or `Alt+Shift+H`. Mode **Always** (for OBS and desktop apps) or **only while this browser shares the screen**, detected automatically.
