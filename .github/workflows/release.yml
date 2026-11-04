@@ -4,7 +4,8 @@ name: Release
 # - Merge to master a commit whose CHANGELOG.md has a new "## [x.y.z] - date" section: this workflow
 #   creates the annotated tag vX.Y.Z (message from that section) and publishes the release.
 # - Or push an annotated tag vX.Y.Z yourself.
-# Either way the full Windows build and test suite runs first, and the release notes are that section.
+# Either way the full Windows build and test suite and the browser extension tests run first, and the
+# release notes are that section. The release carries the Windows setups/zips and CloakDesk-Browser-<v>.zip.
 # 0.x versions and versions with a -suffix are published as pre-releases.
 on:
   push:
@@ -64,8 +65,13 @@ jobs:
     permissions:
       contents: write
 
+  extension:
+    needs: prepare
+    if: needs.prepare.outputs.release == 'true'
+    uses: ./.github/workflows/chromium.yml
+
   release:
-    needs: [prepare, build]
+    needs: [prepare, build, extension]
     runs-on: windows-latest
     permissions:
       contents: write
@@ -100,6 +106,11 @@ jobs:
             $v = (Get-Item "CloakDesk-win-$arch/CloakDesk.exe").VersionInfo.ProductVersion.Split('+')[0]
             if ($v -ne $env:VERSION) { throw "$arch exe is $v, release is $env:VERSION" }
           }
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: CloakDesk-Browser
+          path: dist
 
       - name: Build installers and zips
         shell: pwsh

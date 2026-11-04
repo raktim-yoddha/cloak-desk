@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inbox - raktim.yoddha@gmail.com - Demo Mail</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7fb;
+        --card: #fff;
+        --line: #e6e8f0;
+        --text: #1b1d29;
+        --muted: #6b7083;
+        --brand: #1f6feb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font: 14px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 24px;
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+      }
+      header b {
+        font-size: 18px;
+      }
+      header .me {
+        margin-left: auto;
+        color: var(--muted);
+      }
+      main {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 20px;
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 20px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 16px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 15px;
+      }
+      dl {
+        margin: 0;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 6px 12px;
+      }
+      dt {
+        color: var(--muted);
+      }
+      dd {
+        margin: 0;
+      }
+      .mail {
+        display: grid;
+        grid-template-columns: 180px 1fr 60px;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+      }
+      .mail:first-of-type {
+        border-top: 0;
+      }
+      .mail time {
+        color: var(--muted);
+        text-align: right;
+      }
+      pre {
+        margin: 0;
+        padding: 14px;
+        border-radius: 10px;
+        background: #0f1222;
+        color: #dfe3ff;
+        font: 13px/1.6 ui-monospace, Consolas, monospace;
+        overflow-x: auto;
+      }
+      form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      label {
+        display: grid;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      input {
+        padding: 9px 11px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        font: inherit;
+        color: var(--text);
+      }
+      button {
+        padding: 9px 14px;
+        border: 0;
+        border-radius: 9px;
+        background: var(--brand);
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .split {
+        color: var(--muted);
+      }
+      iframe {
+        width: 100%;
+        height: 70px;
+        border: 1px dashed var(--line);
+        border-radius: 10px;
+      }
+      @media (max-width: 800px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <b>Demo Mail</b>
+      <span>A fake page full of personal details, to try Cloak Desk Browser Safety on.</span>
+      <span class="me" id="me">raktim.yoddha@gmail.com</span>
+    </header>
+    <main>
+      <aside>
+        <div class="card" id="profile">
+          <h2>Your profile</h2>
+          <dl>
+            <dt>Email</dt>
+            <dd>raktim.yoddha@gmail.com</dd>
+            <dt>Phone</dt>
+            <dd>+91 98765 43210</dd>
+            <dt>Work</dt>
+            <dd>(415) 555-0132</dd>
+            <dt>PAN</dt>
+            <dd>ABCPE1234F</dd>
+            <dt>Aadhaar</dt>
+            <dd>2345 6789 0124</dd>
+            <dt>Home IP</dt>
+            <dd>203.0.113.42</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <h2>Payment</h2>
+          <dl>
+            <dt>Card</dt>
+            <dd>4111 1111 1111 1111</dd>
+            <dt>IBAN</dt>
+            <dd>GB82 WEST 1234 5698 7654 32</dd>
+            <dt>Wallet</dt>
+            <dd>0x52908400098527886E0F7030069857D2E4169EE7</dd>
+          </dl>
+        </div>
+      </aside>
+      <section>
+        <div class="card" id="inbox">
+          <h2>Inbox</h2>
+          <div class="mail"><b>Ananya Kapoor</b><span>Call me on +44 20 7946 0958 or ananya.kapoor@northwind.in</span><time>10:42</time></div>
+          <div class="mail"><b>GitHub</b><span>Your new token ghp_8fK2xQ9mVt7Lr1ZsP0cWbN4yHd6Ue3Ja5Gk1 was created</span><time>09:15</time></div>
+          <div class="mail"><b>Bank</b><span>Account statement for card ending 1111. Order #123456 shipped 2026-11-04.</span><time>Mon</time></div>
+          <div class="mail"><b>Split text</b><span class="split">Number split in spans: <span>+91 </span><b>91234</b><i> 56780</i></span><time>Sun</time></div>
+        </div>
+        <div class="card">
+          <h2>.env file</h2>
+          <pre id="env">GITHUB_TOKEN=ghp_8fK2xQ9mVt7Lr1ZsP0cWbN4yHd6Ue3Ja5Gk1
+STRIPE_SECRET_KEY=demo-not-a-real-key-7f3a9c2e
+OPENAI_API_KEY=sk-proj-abcdefghijklmnopqrstuvwxyz012345
+DATABASE_URL=postgres://admin:s3cr3tPass@203.0.113.42/app
+DB_PASSWORD=hunter2!x</pre>
+        </div>
+        <div class="card">
+          <h2>Form</h2>
+          <form onsubmit="return false">
+            <label>Email<input type="email" id="f-email" value="raktim.yoddha@gmail.com" /></label>
+            <label>Phone<input type="tel" id="f-tel" value="+91 98765 43210" /></label>
+            <label>Password<input type="password" id="f-pass" value="correct horse" /></label>
+            <label>Search<input type="search" id="f-search" placeholder="Type an email here" /></label>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Web component (shadow DOM) and iframe</h2>
+          <contact-card id="cc"></contact-card>
+          <iframe id="frame" title="frame" srcdoc="<body style='font:14px system-ui;margin:12px'>Inside an iframe: support@northwind.in, +1 415-555-0199</body>"></iframe>
+        </div>
+        <div class="card">
+          <h2>Try it</h2>
+          <div class="actions">
+            <button id="share">Share a screen (getDisplayMedia)</button>
+            <button id="stop">Stop sharing</button>
+            <button id="add">Add a new message</button>
+            <button id="notify">Show a notification</button>
+          </div>
+          <p id="log" class="split"></p>
+        </div>
+      </section>
+    </main>
+    <script>
+      customElements.define(
+        'contact-card',
+        class extends HTMLElement {
+          constructor() {
+            super();
+            this.attachShadow({ mode: 'closed' }).innerHTML =
+              '<style>p{margin:0 0 10px;padding:10px;border-radius:10px;background:#eef3ff}</style><p>Closed shadow root: priya@contoso.com · +91 99887 76655</p>';
+          }
+        }
+      );
+      let stream = null;
+      const log = (t) => (document.getElementById('log').textContent = t);
+      document.getElementById('share').onclick = async () => {
+        try {
+          stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          log('Sharing. In "While sharing" mode, every tab now hides details.');
+        } catch (e) {
+          log('Share cancelled: ' + e.message);
+        }
+      };
+      document.getElementById('stop').onclick = () => {
+        if (stream) stream.getTracks().forEach((t) => t.stop());
+        stream = null;
+        log('Stopped sharing.');
+      };
+      document.getElementById('add').onclick = () => {
+        const d = document.createElement('div');
+        d.className = 'mail';
+        d.innerHTML = '<b>New</b><span>Fresh message from rahul.sen@example.org, OTP pin: 482913</span><time>now</time>';
+        document.getElementById('inbox').append(d);
+      };
+      document.getElementById('notify').onclick = async () => {
+        if ((await Notification.requestPermission()) === 'granted') new Notification('Ananya Kapoor', { body: 'My number is +91 98765 43210' });
+      };
+    </script>
+  </body>
+</html>

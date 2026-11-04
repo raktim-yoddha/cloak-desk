@@ -1,0 +1,60 @@
+name: Browser extension
+
+on:
+  push:
+    branches: ["**"]
+    paths: ["chromium/**", ".github/workflows/chromium.yml"]
+  pull_request:
+    paths: ["chromium/**", ".github/workflows/chromium.yml"]
+  workflow_dispatch:
+  workflow_call: # release.yml attaches the packed extension to the GitHub release
+
+permissions:
+  contents: read
+
+jobs:
+  extension:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chromium
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: chromium/package-lock.json
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Static checks (manifest, CSP, no network or eval)
+        run: npm run check
+
+      - name: Detector unit tests
+        run: npm test
+
+      - name: End-to-end test in Chromium (real extension, demo page)
+        run: npm run e2e -- test-results
+
+      - name: Pack
+        id: pack
+        run: |
+          npm run pack
+          echo "version=$(node -p "require('./extension/manifest.json').version")" >> "$GITHUB_OUTPUT"
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CloakDesk-Browser
+          path: chromium/dist/CloakDesk-Browser-*.zip
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-test-results
+          path: chromium/test-results

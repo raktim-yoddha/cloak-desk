@@ -1,0 +1,8 @@
+/*
+ * Registered by the service worker only while hiding is on. Keeps a freshly loading page
+ * invisible for the few milliseconds until mask.js has scanned it, so nothing sensitive
+ * is painted even once. mask.js always sets the attribute (with a 1.5 s failsafe).
+ */
+html:not([data-cloakdesk-ready]) {
+  visibility: hidden !important;
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cloak Desk</title>
+    <link rel="stylesheet" href="../ui/ui.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <img class="logo" src="../../icons/app-48.png" alt="" width="30" height="30" />
+        <div>
+          <div class="brand-name">Cloak Desk</div>
+          <div class="brand-sub">Browser Safety</div>
+        </div>
+      </div>
+      <button class="icon-btn" id="openSettings" title="All settings" aria-label="All settings"><span data-icon="sliders"></span></button>
+    </header>
+
+    <main>
+      <section class="hero" id="hero" data-state="off" aria-live="polite">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-row">
+          <div class="emblem" aria-hidden="true">
+            <span class="ring"></span>
+            <span data-icon="shield" class="emblem-on"></span>
+            <span data-icon="shield-off" class="emblem-off"></span>
+          </div>
+          <div class="hero-text">
+            <div class="hero-title" id="heroTitle">Protection is off</div>
+            <div class="hero-sub" id="heroSub">Turn on to hide sensitive details</div>
+          </div>
+          <button class="switch switch-lg" role="switch" id="master" aria-checked="false" aria-label="Hide sensitive details"></button>
+        </div>
+        <div class="hero-meta">
+          <span class="pill pill-live" id="livePill" hidden><span class="dot"></span>Screen share detected</span>
+          <span class="pill" id="countPill" hidden></span>
+          <button class="link-btn" id="resetShare" hidden>Not sharing anymore?</button>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="label">When to hide</div>
+        <div class="seg" role="radiogroup" aria-label="When to hide" id="mode">
+          <button role="radio" data-mode="always" aria-checked="true"><span data-icon="eye-off"></span>Always</button>
+          <button role="radio" data-mode="sharing" aria-checked="false"><span data-icon="share"></span>While sharing</button>
+        </div>
+        <p class="hint" id="modeHint"></p>
+      </section>
+
+      <section class="block" id="siteBlock">
+        <div class="label">This site <span class="host" id="siteHost"></span></div>
+        <div class="list">
+          <div class="mini-row">
+            <span data-icon="globe" class="row-ic"></span>
+            <div class="mini-text">Hide details on this site</div>
+            <button class="switch" role="switch" id="siteSwitch" aria-checked="true" aria-label="Hide details on this site"></button>
+          </div>
+          <div class="mini-row">
+            <span data-icon="curtain" class="row-ic"></span>
+            <div class="mini-text">Cover the whole page<small>Viewers see a curtain instead of this site</small></div>
+            <button class="switch" role="switch" id="curtainSwitch" aria-checked="false" aria-label="Cover the whole page"></button>
+          </div>
+        </div>
+        <p class="hint" id="siteNote" hidden>Chrome doesn't let extensions run on this page. Its contents can't be hidden.</p>
+      </section>
+
+      <section class="block">
+        <div class="label">What to hide</div>
+        <div class="chips" id="chips"></div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span class="shortcut" id="shortcut"></span>
+      <a href="#" id="more">All settings<span data-icon="arrow"></span></a>
+    </footer>
+
+    <script src="../shared/settings.js"></script>
+    <script src="../shared/detectors.js"></script>
+    <script src="../ui/icons.js"></script>
+    <script src="../ui/store.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

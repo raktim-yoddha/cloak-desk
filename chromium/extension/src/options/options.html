@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cloak Desk Browser Safety</title>
+    <link rel="icon" href="../../icons/app-32.png" />
+    <link rel="stylesheet" href="../ui/ui.css" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="nav">
+        <div class="brand">
+          <img src="../../icons/app-128.png" alt="" width="40" height="40" />
+          <div>
+            <div class="brand-name">Cloak Desk</div>
+            <div class="brand-sub">Browser Safety</div>
+          </div>
+        </div>
+        <nav aria-label="Settings sections">
+          <a href="#protection"><span data-icon="shield"></span>Protection</a>
+          <a href="#detect"><span data-icon="eye-off"></span>What to hide</a>
+          <a href="#words"><span data-icon="text"></span>Your own words</a>
+          <a href="#more"><span data-icon="field"></span>Fields, titles & alerts</a>
+          <a href="#sites"><span data-icon="globe"></span>Sites</a>
+          <a href="#look"><span data-icon="palette"></span>Look</a>
+          <a href="#privacy"><span data-icon="lock"></span>Privacy & limits</a>
+          <a href="#backup"><span data-icon="download"></span>Backup</a>
+        </nav>
+        <div class="nav-status" id="navStatus"><span class="dot"></span><span id="navStatusText">Off</span></div>
+      </aside>
+
+      <main class="content">
+        <!-- ---------- welcome ---------- -->
+        <section class="welcome" id="welcome" hidden>
+          <div class="welcome-bg" aria-hidden="true"></div>
+          <div class="welcome-inner">
+            <span class="pill welcome-pill"><span data-icon="sparkles"></span>Installed</span>
+            <h1>Stream and share without leaking your details</h1>
+            <p>
+              Cloak Desk hides email addresses, phone numbers, card numbers, IDs and API keys on every web page, so viewers of your stream or
+              screen share never see them. You still see everything you type. It's off until you turn it on.
+            </p>
+            <div class="welcome-actions">
+              <button class="btn btn-primary btn-xl" id="welcomeEnable"><span data-icon="shield"></span>Turn on protection</button>
+              <a class="btn btn-glass btn-xl" href="#preview"><span data-icon="eye-off"></span>See it work</a>
+            </div>
+            <ol class="steps">
+              <li><span class="step-n">1</span><div><b>Pin it</b><small>Click <span data-icon="puzzle" class="inline-i"></span> in the toolbar, then the pin next to Cloak Desk.</small></div></li>
+              <li><span class="step-n">2</span><div><b>Turn it on</b><small>From the toolbar button, or with <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd>.</small></div></li>
+              <li><span class="step-n">3</span><div><b>Go live</b><small>Share in Meet, Zoom, Teams, Discord or OBS. Your details stay hidden.</small></div></li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- ---------- protection ---------- -->
+        <section id="protection" class="section">
+          <h2>Protection</h2>
+          <div class="card hero-card" id="heroCard" data-state="off">
+            <div class="hero-card-bg" aria-hidden="true"></div>
+            <div class="row row-hero">
+              <div class="row-ic big"><span data-icon="shield"></span></div>
+              <div class="row-text">
+                <div class="row-title" id="masterTitle">Hide sensitive details</div>
+                <div class="row-sub" id="masterSub">Off. Turn on before you go live.</div>
+              </div>
+              <button class="switch switch-lg" role="switch" id="master" aria-checked="false" aria-label="Hide sensitive details"></button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="row">
+              <div class="row-ic"><span data-icon="share"></span></div>
+              <div class="row-text">
+                <div class="row-title">When to hide</div>
+                <div class="row-sub">Streaming apps outside the browser can't be detected, so use <b>Always</b> for OBS and desktop apps.</div>
+              </div>
+            </div>
+            <div class="mode-cards" role="radiogroup" aria-label="When to hide" id="mode">
+              <button class="mode-card" role="radio" data-mode="always" aria-checked="true">
+                <span data-icon="eye-off" class="mode-ic"></span>
+                <b>Always</b>
+                <small>Whenever protection is on. Works with OBS, Zoom, Teams, Discord and any desktop app.</small>
+                <span class="radio-dot" aria-hidden="true"></span>
+              </button>
+              <button class="mode-card" role="radio" data-mode="sharing" aria-checked="false">
+                <span data-icon="radio" class="mode-ic"></span>
+                <b>Only while sharing from this browser</b>
+                <small>Turns on by itself when Meet, Teams, Zoom or any tab starts sharing, and off when it stops.</small>
+                <span class="radio-dot" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="row row-sep">
+              <div class="row-ic"><span data-icon="keyboard"></span></div>
+              <div class="row-text">
+                <div class="row-title">Keyboard shortcut</div>
+                <div class="row-sub" id="shortcutText">Alt+Shift+H turns protection on or off</div>
+              </div>
+              <button class="btn" id="shortcutBtn">Change</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- detectors ---------- -->
+        <section id="detect" class="section">
+          <h2>What to hide</h2>
+          <p class="lead">Found anywhere in a page: text, tables, chat, code, editors and inside web components. Cards, IBANs and Aadhaar numbers are checksum-verified.</p>
+          <div class="card" id="detectorList"></div>
+        </section>
+
+        <!-- ---------- words ---------- -->
+        <section id="words" class="section">
+          <h2>Your own words</h2>
+          <p class="lead">Your name, home address, company, client names, usernames… Matched anywhere on a page, ignoring upper and lower case.</p>
+          <div class="card pad">
+            <label class="field-label" for="wordsInput">Words and phrases</label>
+            <div class="tags" id="wordsTags"><input id="wordsInput" placeholder="Type and press Enter" autocomplete="off" spellcheck="false" /></div>
+            <p class="help">Tip: select text on any page, right-click and choose <b>Always hide “…”</b>.</p>
+            <details class="adv">
+              <summary>Advanced: patterns (regular expressions)</summary>
+              <div class="tags" id="patternsTags"><input id="patternsInput" placeholder="/EMP-\d{5}/  then Enter" autocomplete="off" spellcheck="false" /></div>
+              <p class="help" id="patternHelp">JavaScript syntax. Case-insensitive unless written as <code>/…/</code> without the <code>i</code> flag.</p>
+            </details>
+          </div>
+        </section>
+
+        <!-- ---------- more ---------- -->
+        <section id="more" class="section">
+          <h2>Fields, titles & alerts</h2>
+          <div class="card">
+            <div class="row">
+              <div class="row-ic"><span data-icon="field"></span></div>
+              <div class="row-text">
+                <div class="row-title">Hide what's typed in sensitive fields</div>
+                <div class="row-sub">Email, phone, card, address, password and token fields show dots, even after a “show password” click.</div>
+              </div>
+              <button class="switch" role="switch" data-key="fields" aria-label="Hide what's typed in sensitive fields"></button>
+            </div>
+            <div class="row">
+              <div class="row-ic"><span data-icon="tab"></span></div>
+              <div class="row-text">
+                <div class="row-title">Clean tab titles</div>
+                <div class="row-sub">“Inbox – you@gmail.com – Gmail” becomes “Inbox – ••••• – Gmail” in the tab strip.</div>
+              </div>
+              <button class="switch" role="switch" data-key="titles" aria-label="Clean tab titles"></button>
+            </div>
+            <div class="row">
+              <div class="row-ic"><span data-icon="bell-off"></span></div>
+              <div class="row-text">
+                <div class="row-title">Hide notification previews</div>
+                <div class="row-sub">Chat and mail pop-ups from open sites show only the site name, not the message.</div>
+              </div>
+              <button class="switch" role="switch" data-key="notifications" aria-label="Hide notification previews"></button>
+            </div>
+            <div class="row">
+              <div class="row-ic"><span data-icon="sparkles"></span></div>
+              <div class="row-text">
+                <div class="row-title">Count on the toolbar button</div>
+                <div class="row-sub">Shows how many details are hidden on the current page.</div>
+              </div>
+              <button class="switch" role="switch" data-key="badge" aria-label="Count on the toolbar button"></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- sites ---------- -->
+        <section id="sites" class="section">
+          <h2>Sites</h2>
+          <div class="card pad">
+            <label class="field-label" for="curtainInput"><span data-icon="curtain"></span>Cover completely</label>
+            <p class="help top">The whole page is replaced by a curtain while protection is on. Good for password managers, banking and admin consoles.</p>
+            <div class="tags" id="curtainTags"><input id="curtainInput" placeholder="bank.example.com" autocomplete="off" spellcheck="false" /></div>
+          </div>
+          <div class="card pad">
+            <label class="field-label" for="allowInput"><span data-icon="globe"></span>Never hide anything on</label>
+            <p class="help top">For sites where hiding gets in the way. Subdomains are included.</p>
+            <div class="tags" id="allowTags"><input id="allowInput" placeholder="example.com" autocomplete="off" spellcheck="false" /></div>
+          </div>
+        </section>
+
+        <!-- ---------- look ---------- -->
+        <section id="look" class="section">
+          <h2>Look</h2>
+          <div class="card pad">
+            <div class="style-cards" role="radiogroup" aria-label="Mask style" id="styles">
+              <button class="style-card" role="radio" data-style="redact"><span class="sample"><i class="s-redact">raktim@gmail.com</i></span><b>Redact</b><small>Solid bar, nothing shows through</small></button>
+              <button class="style-card" role="radio" data-style="blur"><span class="sample"><i class="s-blur">raktim@gmail.com</i></span><b>Frosted</b><small>Soft blur that keeps the layout</small></button>
+              <button class="style-card" role="radio" data-style="tint"><span class="sample"><i class="s-tint">raktim@gmail.com</i></span><b>Tint</b><small>Light colored bar</small></button>
+            </div>
+            <div class="swatches" role="radiogroup" aria-label="Mask color" id="swatches"></div>
+          </div>
+
+          <div class="preview card" id="preview">
+            <div class="preview-head">
+              <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span class="preview-title">Live preview</span>
+              <div class="seg seg-sm" role="radiogroup" aria-label="Preview">
+                <button role="radio" aria-checked="true" data-pv="viewer"><span data-icon="eye-off"></span>What viewers see</button>
+                <button role="radio" aria-checked="false" data-pv="you"><span data-icon="monitor"></span>Without Cloak Desk</button>
+              </div>
+            </div>
+            <div class="preview-body" id="previewBody">
+              <div class="mail">
+                <div class="avatar">AK</div>
+                <div class="mail-main">
+                  <div class="mail-top"><b>Ananya Kapoor</b> <span>&lt;ananya.kapoor@northwind.in&gt;</span><time>10:42</time></div>
+                  <div class="mail-subj">Contract details for Monday</div>
+                  <p>Hi Raktim, call me on +91 98765 43210 once you're free. Card on file: 4111 1111 1111 1111. My PAN for the invoice is ABCPE1234F.</p>
+                </div>
+              </div>
+              <pre class="code"><span class="c"># .env</span>
+GITHUB_TOKEN=ghp_8fK2xQ9mVt7Lr1ZsP0cWbN4yHd6Ue3Ja5Gk1
+STRIPE_SECRET_KEY=demo-not-a-real-key-7f3a9c2e
+DATABASE_URL=postgres://admin:s3cr3tPass@203.0.113.42/app</pre>
+              <div class="form-demo">
+                <label>Email<input type="email" value="raktim.yoddha@gmail.com" readonly tabindex="-1" /></label>
+                <label>Phone<input type="tel" value="+1 415-555-0132" readonly tabindex="-1" /></label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- privacy ---------- -->
+        <section id="privacy" class="section">
+          <h2>Privacy & limits</h2>
+          <div class="grid2">
+            <div class="card pad info">
+              <span data-icon="wifi-off" class="info-ic ok"></span>
+              <b>Nothing leaves your computer</b>
+              <p>No servers, no analytics, no accounts, and no network code at all. The popup, this page and the background worker are also blocked from the network by the extension's security policy. Settings stay on this device and are never synced.</p>
+            </div>
+            <div class="card pad info">
+              <span data-icon="lock" class="info-ic ok"></span>
+              <b>Pages can't read your list</b>
+              <p>Your words and patterns stay inside the extension. Pages are never changed: masks are painted on top, so sites keep working and can't see what was hidden.</p>
+            </div>
+            <div class="card pad info">
+              <span data-icon="puzzle" class="info-ic"></span>
+              <b>Why “read and change all sites”</b>
+              <p>To find sensitive text on whatever page you show. Cloak Desk only reads text to cover it; it never stores, logs or sends page content.</p>
+            </div>
+            <div class="card pad info">
+              <span data-icon="alert" class="info-ic warn"></span>
+              <b>What it can't hide</b>
+              <ul>
+                <li>Chrome's own UI: address bar, autofill pop-ups, bookmarks, the Chrome Web Store and <code>chrome://</code> pages.</li>
+                <li>Text inside images, videos, PDFs and canvas apps (Google Docs, Figma).</li>
+                <li>Matches highlighted by Chrome's Find bar (Ctrl+F).</li>
+                <li>Other apps on your desktop. For those, use <a href="https://github.com/raktim-yoddha/cloak-desk#readme" target="_blank" rel="noopener">Cloak Desk for Windows</a>.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- backup ---------- -->
+        <section id="backup" class="section">
+          <h2>Backup</h2>
+          <div class="card">
+            <div class="row">
+              <div class="row-ic"><span data-icon="download"></span></div>
+              <div class="row-text">
+                <div class="row-title">Export settings</div>
+                <div class="row-sub">A JSON file with your words, sites and choices. Keep it private.</div>
+              </div>
+              <button class="btn" id="exportBtn">Export</button>
+            </div>
+            <div class="row">
+              <div class="row-ic"><span data-icon="upload"></span></div>
+              <div class="row-text">
+                <div class="row-title">Import settings</div>
+                <div class="row-sub">Replaces your current settings. Protection stays as it is now.</div>
+              </div>
+              <button class="btn" id="importBtn">Import…</button>
+              <input type="file" id="importFile" accept="application/json,.json" hidden />
+            </div>
+            <div class="row">
+              <div class="row-ic"><span data-icon="reset"></span></div>
+              <div class="row-text">
+                <div class="row-title">Reset to defaults</div>
+                <div class="row-sub">Clears your words and sites.</div>
+              </div>
+              <button class="btn btn-danger" id="resetBtn">Reset</button>
+            </div>
+          </div>
+          <p class="foot-note" id="version"></p>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="../shared/settings.js"></script>
+    <script src="../shared/detectors.js"></script>
+    <script src="../shared/masker.js"></script>
+    <script src="../ui/icons.js"></script>
+    <script src="../ui/store.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

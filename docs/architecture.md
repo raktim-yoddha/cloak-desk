@@ -92,3 +92,19 @@ colors and the desktop flag. App IDs have to be picked again.
 - Idle in tray: no capture, no timers, settings window destroyed (not just hidden).
 - Cloaked: one capture stream, one GPU copy plus rectangle fills per frame, no CPU pixel work.
 - No web view, no bundled runtime beyond what the OS provides.
+
+## Browser extension
+
+Apps can be curtained by the Stage, but a browser shows many different things in one window. The
+extension in `chromium/` hides the sensitive *details inside* web pages instead of whole windows:
+
+| Concern | Approach |
+|---|---|
+| Find details | Patterns with checksums (Luhn, mod-97, Verhoeff) plus the user's own words, per text block so split numbers are still found. |
+| Cover them | CSS Custom Highlight API: live ranges painted as a bar. No DOM changes, so pages keep working and masks never lag behind the text. |
+| Never paint unmasked text | A registered stylesheet hides a loading page until its first scan; a `MutationObserver` re-checks changes before the next frame. |
+| When | Always, or only while a tab in the browser calls `getDisplayMedia` (detected by a page-world hook). Desktop streaming apps can't be seen from an extension, so they need *Always*. |
+| Trust | No network code, strict CSP, settings only on the device. |
+
+Details: [chromium/README.md](../chromium/README.md).
+
