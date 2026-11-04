@@ -57,7 +57,8 @@ jobs:
               Sort-Object KB -Descending | ForEach-Object { "{0,10:N0} KB {1,4} files  {2}" -f $_.KB, $_.Count, $_.Name }
             "== all files"
             $files | Sort-Object Length -Descending | ForEach-Object { "{0,10:N0} KB  {1}" -f ($_.Length / 1KB), $_.FullName.Substring($root.Length + 1) }
-          } | Tee-Object size.txt | Select-Object -First 60
+          } | Set-Content size.txt
+          Get-Content size.txt | Select-String -NotMatch '^\s+\d+ KB\s+2 files' | Select-Object -First 80
 
       - name: Build (Debug, JIT, console)
         if: matrix.arch == 'x64'
