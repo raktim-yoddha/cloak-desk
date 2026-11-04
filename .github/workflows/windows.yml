@@ -92,7 +92,10 @@ jobs:
           Write-Host "Windows App Runtime 1.8 >= $min present before setup: $(RuntimeOk) (setup installs or updates it when not)"
           Write-Host ("setup: {0} ({1:N1} MB), file version {2}" -f $setup.Name, ($setup.Length / 1MB), $setup.VersionInfo.ProductVersion)
           $dir = "$env:LOCALAPPDATA\Programs\Cloak Desk"
-          Start-Process $setup.FullName -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=startup' -Wait
+          Start-Process $setup.FullName -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=startup', "/LOG=$PWD\setup.log" -Wait
+          Write-Host '---- setup log (runtime part)'
+          Get-Content setup.log | Select-String -Pattern 'Runtime|runtime|Download|download|PrepareToInstall|error|Error' | ForEach-Object { $_.Line }
+          Write-Host "Windows App Runtime 1.8 >= $min present after setup: $(RuntimeOk)"
           if (-not (Test-Path "$dir\CloakDesk.exe")) { throw "not installed to $dir" }
           $run = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -ErrorAction SilentlyContinue).CloakDesk
           if ($run -ne "`"$dir\CloakDesk.exe`" --tray") { throw "startup task wrote Run key '$run'" }
@@ -160,6 +163,7 @@ jobs:
           foreach ($d in 'smoke', 'e2e', 'tour') { if (Test-Path $d) { Copy-Item $d $dst -Recurse } }
           if (Test-Path publish.log) { Copy-Item publish.log $dst }
           if (Test-Path size.txt) { Copy-Item size.txt $dst }
+          if (Test-Path setup.log) { Copy-Item setup.log $dst }
           Set-Location $dst
           git init -q; git checkout -q -b ci-artifacts; git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Run ${{ github.run_id }} on ${{ github.ref_name }} @ ${{ github.sha }}"

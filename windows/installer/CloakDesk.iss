@@ -106,16 +106,25 @@ var
   Code: Integer;
 begin
   Result := '';
-  if RuntimeInstalled then Exit;
+  if RuntimeInstalled then
+  begin
+    Log('Windows App Runtime 1.8 >= {#RuntimeMinVersion} already installed');
+    Exit;
+  end;
+  Log('Downloading {#RuntimeUrl}');
   try
     DownloadTemporaryFile('{#RuntimeUrl}', 'WindowsAppRuntimeInstall.exe', '', nil);
   except
+    Log('Download failed: ' + GetExceptionMessage);
     Result := 'Cloak Desk needs the Windows App Runtime 1.8 from Microsoft, and it couldn''t be downloaded. ' +
       'Check your internet connection and run setup again, or install it from {#RuntimeUrl}';
     Exit;
   end;
-  if not Exec(ExpandConstant('{tmp}\WindowsAppRuntimeInstall.exe'), '--quiet', '', SW_HIDE, ewWaitUntilTerminated, Code)
-     or (Code <> 0) or not RuntimeInstalled then
+  if not Exec(ExpandConstant('{tmp}\WindowsAppRuntimeInstall.exe'), '--quiet', '', SW_HIDE, ewWaitUntilTerminated, Code) then
+    Log('Could not start the runtime installer: ' + SysErrorMessage(Code))
+  else
+    Log(Format('Runtime installer exit code %d', [Code]));
+  if not RuntimeInstalled then
     Result := Format('Installing the Windows App Runtime 1.8 failed (code %d). Install it from {#RuntimeUrl} and run setup again.', [Code]);
 end;
 
