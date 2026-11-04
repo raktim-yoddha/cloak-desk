@@ -214,11 +214,12 @@ Step 'Tray panel' {
     Check 'Tray click opens the panel' (WaitFor { Panel } 10)
     Start-Sleep -Seconds 1
     Shot 'tray-panel'
-    $sw = (Panel).FindFirst([System.Windows.Automation.TreeScope]::Descendants, (Prop $UIA::NameProperty 'Cloak'))
-    Toggle $sw
+    # by AutomationId: the panel's "Cloak" title text has the same name as the switch
+    function PanelSwitch() { (Panel).FindFirst([System.Windows.Automation.TreeScope]::Descendants, (Prop $UIA::AutomationIdProperty 'CloakSwitch')) }
+    Toggle (PanelSwitch)
     Check 'Panel switch starts the Stage' (WaitFor { HasStage } 15)
-    Check 'Panel shows the cloak on' (WaitFor { IsOn ((Panel).FindFirst([System.Windows.Automation.TreeScope]::Descendants, (Prop $UIA::NameProperty 'Cloak'))) } 5)
-    Toggle ((Panel).FindFirst([System.Windows.Automation.TreeScope]::Descendants, (Prop $UIA::NameProperty 'Cloak')))
+    Check 'Panel shows the cloak on' (WaitFor { IsOn (PanelSwitch) } 5)
+    Toggle (PanelSwitch)
     Check 'Panel switch stops the Stage' (WaitFor { -not (HasStage) } 10)
     TrayClick
     Check 'Second tray click closes the panel' (WaitFor { -not (Panel) } 5)
