@@ -20,9 +20,10 @@
 #endif
 ; Windows App Runtime the app is built against (Microsoft.WindowsAppSDK 1.8) and Microsoft's installer for it.
 #define RuntimePackage "Microsoft.WindowsAppRuntime.1.8"
-; Lowest runtime the app accepts: the framework package version of Microsoft.WindowsAppSDK.Runtime 1.8.260804001
-; (CloakDesk.csproj). Older 1.8 runtimes get updated. CI checks this matches the NuGet package.
-#define RuntimeMinVersion "8000.946.1701.0"
+; Lowest runtime the app accepts: the framework package version of Microsoft.WindowsAppSDK.Runtime 1.8.260710003
+; (CloakDesk.csproj). Older 1.8 runtimes get updated. CI checks this matches the NuGet package, and that the
+; installer at RuntimeUrl provides it.
+#define RuntimeMinVersion "8000.921.1539.0"
 #define RuntimeUrl "https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-" + LowerCase(Arch) + ".exe"
 ; Numeric part only (1.2.3 of 1.2.3-beta.1) for the Windows file version.
 #define NumericVersion Copy(AppVersion, 1, Pos("-", AppVersion + "-") - 1)
