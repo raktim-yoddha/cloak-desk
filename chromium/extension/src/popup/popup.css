@@ -54,8 +54,16 @@ section + section,
   color: var(--fg-2);
 }
 
+.status #statusText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .status .link {
   margin-left: auto;
+  white-space: nowrap;
 }
 
 /* ---------- rows ---------- */

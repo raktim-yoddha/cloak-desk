@@ -58,7 +58,7 @@
       text.textContent = 'Off';
     } else if (sharing && active) {
       dot.classList.add('live');
-      text.textContent = 'Screen share detected';
+      text.textContent = 'Live share';
     } else if (active) {
       dot.classList.add('on');
       text.textContent = 'Hiding sensitive details';

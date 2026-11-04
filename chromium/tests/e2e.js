@@ -335,7 +335,7 @@ const server = http.createServer((req, res) => {
     await page.click('#share');
     await waitFor(async () => (await masked()).active, 'live');
     p = await openPopup(demoTab, '13-popup-live-share');
-    assert.match(await p.textContent('#statusText'), /Screen share detected/);
+    assert.match(await p.textContent('#statusText'), /^Live share/);
     assert.equal(await p.isVisible('#resetShare'), true);
     await p.click('#resetShare');
     await waitFor(async () => (await sw.evaluate(() => chrome.storage.local.get('runtime'))).runtime.sharing === 0, '"Not sharing?" clears the share');
@@ -348,12 +348,15 @@ const server = http.createServer((req, res) => {
     await p.close();
     await setSettings({ allowSites: [] });
 
-    const extTab = await sw.evaluate(async () => (await chrome.tabs.query({ url: chrome.runtime.getURL('*') }))[0]?.id);
-    if (extTab) {
-      p = await openPopup(extTab, '15-popup-unsupported-page');
-      assert.equal(await p.isVisible('#noSite'), true);
-      await p.close();
-    }
+    // a page Chrome doesn't let extensions run on (here: one of the extension's own pages)
+    const other = await ctx.newPage();
+    await other.goto(`chrome-extension://${extId}/src/options/options.html`);
+    const extTab = await other.evaluate(async () => (await chrome.tabs.getCurrent()).id);
+    p = await openPopup(extTab, '15-popup-unsupported-page');
+    assert.equal(await p.isVisible('#noSite'), true);
+    assert.equal(await p.isVisible('#site'), false);
+    await p.close();
+    await other.close();
   });
 
   await step('popup: every control works', async () => {
