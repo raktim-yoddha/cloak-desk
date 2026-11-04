@@ -122,6 +122,7 @@ jobs:
       # Screenshots and results on a throwaway branch, readable with plain git (latest branch run only).
       - name: Publish test results to the ci-artifacts branch
         if: always() && matrix.arch == 'x64' && github.ref_type == 'branch' && github.event_name == 'push'
+        continue-on-error: true # convenience copy only; a GitHub hiccup here must not fail the build
         shell: pwsh
         run: |
           $dst = Join-Path $env:RUNNER_TEMP ci
@@ -131,7 +132,7 @@ jobs:
           Set-Location $dst
           git init -q; git checkout -q -b ci-artifacts; git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Run ${{ github.run_id }} on ${{ github.ref_name }} @ ${{ github.sha }}"
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-artifacts
+          for ($i = 0; $i -lt 3; $i++) { git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-artifacts; if (-not $LASTEXITCODE) { break }; Start-Sleep 10 }
 
       - uses: actions/upload-artifact@v4
         with:
