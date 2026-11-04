@@ -117,11 +117,12 @@ jobs:
           path: |
             smoke
             e2e
+            tour
             publish.log
 
       # Screenshots and results on a throwaway branch, readable with plain git (latest branch run only).
       - name: Publish test results to the ci-artifacts branch
-        if: always() && matrix.arch == 'x64' && github.ref_type == 'branch' && github.event_name == 'push'
+        if: always() && matrix.arch == 'x64' && github.ref_type == 'branch' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         continue-on-error: true # convenience copy only; a GitHub hiccup here must not fail the build
         shell: pwsh
         run: |
