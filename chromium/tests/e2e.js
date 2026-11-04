@@ -294,6 +294,266 @@ const server = http.createServer((req, res) => {
     }
   });
 
+  // ---------- every feature, driven like a user ----------
+
+  const tabIdOf = (u) => sw.evaluate(async (x) => (await chrome.tabs.query({ url: x + '*' }))[0].id, u);
+  const getSettings = () => sw.evaluate(async () => self.CloakDesk.settings.normalize((await chrome.storage.local.get('settings')).settings));
+  const demoTab = await tabIdOf(url);
+
+  async function openPopup(tabId, name) {
+    const p = await ctx.newPage();
+    watchErrors(p);
+    await p.setViewportSize({ width: 320, height: 600 });
+    await p.goto(`chrome-extension://${extId}/src/popup/popup.html?tab=${tabId}`);
+    await p.waitForTimeout(350);
+    if (name) {
+      const h = await p.evaluate(() => document.body.scrollHeight);
+      await p.setViewportSize({ width: 320, height: h });
+      await p.screenshot({ path: path.join(OUT, `${name}.png`) });
+    }
+    return p;
+  }
+
+  await step('popup: every state', async () => {
+    await setSettings({ enabled: false, mode: 'always', allowSites: [], curtainSites: [] });
+    let p = await openPopup(demoTab, '10-popup-off');
+    assert.equal(await p.textContent('#statusText'), 'Off');
+    await p.close();
+
+    await setSettings({ enabled: true });
+    await waitFor(async () => (await masked()).active, 'on');
+    p = await openPopup(demoTab, '11-popup-on');
+    assert.match(await p.textContent('#statusText'), /Hiding sensitive details · \d+ on this page/);
+    await p.close();
+
+    await setSettings({ mode: 'sharing' });
+    p = await openPopup(demoTab, '12-popup-waiting-for-share');
+    assert.equal(await p.textContent('#statusText'), 'Waiting for a screen share');
+    await p.close();
+
+    await page.bringToFront();
+    await page.click('#share');
+    await waitFor(async () => (await masked()).active, 'live');
+    p = await openPopup(demoTab, '13-popup-live-share');
+    assert.match(await p.textContent('#statusText'), /Screen share detected/);
+    assert.equal(await p.isVisible('#resetShare'), true);
+    await p.click('#resetShare');
+    await waitFor(async () => (await sw.evaluate(() => chrome.storage.local.get('runtime'))).runtime.sharing === 0, '"Not sharing?" clears the share');
+    await p.close();
+    await page.click('#stop');
+
+    await setSettings({ mode: 'always', allowSites: ['localhost'] });
+    p = await openPopup(demoTab, '14-popup-paused-on-site');
+    assert.equal(await p.textContent('#statusText'), 'Paused on localhost');
+    await p.close();
+    await setSettings({ allowSites: [] });
+
+    const extTab = await sw.evaluate(async () => (await chrome.tabs.query({ url: chrome.runtime.getURL('*') }))[0]?.id);
+    if (extTab) {
+      p = await openPopup(extTab, '15-popup-unsupported-page');
+      assert.equal(await p.isVisible('#noSite'), true);
+      await p.close();
+    }
+  });
+
+  await step('popup: every control works', async () => {
+    const p = await openPopup(demoTab);
+    await p.click('#master');
+    await waitFor(async () => (await getSettings()).enabled === false, 'switch off');
+    await waitFor(async () => (await masked()).active === false, 'page uncovered');
+    await p.click('#master');
+    await waitFor(async () => (await masked()).active === true, 'page covered again');
+
+    await p.click('[data-mode="sharing"]');
+    await waitFor(async () => (await getSettings()).mode === 'sharing', 'mode sharing');
+    await p.click('[data-mode="always"]');
+    await waitFor(async () => (await getSettings()).mode === 'always', 'mode always');
+
+    await p.click('#siteSwitch');
+    await waitFor(async () => (await getSettings()).allowSites.includes('localhost'), 'never-hide added');
+    await waitFor(async () => (await masked()).active === false, 'site paused');
+    await p.click('#siteSwitch');
+    await waitFor(async () => (await getSettings()).allowSites.length === 0, 'never-hide removed');
+
+    await p.click('#curtainSwitch');
+    await waitFor(async () => (await getSettings()).curtainSites.includes('localhost'), 'curtain added');
+    await waitFor(() => page.evaluate(() => !!document.querySelector('cloakdesk-curtain')), 'curtain shown');
+    await p.click('#curtainSwitch');
+    await waitFor(() => page.evaluate(() => !document.querySelector('cloakdesk-curtain')), 'curtain removed');
+
+    const opened = ctx.waitForEvent('page');
+    await p.click('#detecting');
+    const settingsPage = await opened;
+    await settingsPage.waitForLoadState();
+    assert.match(settingsPage.url(), /options\.html#detection$/);
+    await settingsPage.close();
+  });
+
+  await step('keyboard shortcut toggles protection', async () => {
+    await sw.evaluate(() => self.onCommand('toggle-cloak'));
+    await waitFor(async () => (await getSettings()).enabled === false, 'off by shortcut');
+    await sw.evaluate(() => self.onCommand('toggle-cloak'));
+    await waitFor(async () => (await getSettings()).enabled === true, 'on by shortcut');
+  });
+
+  await step('right-click menu: always hide, cover site, never hide', async () => {
+    const before = (await masked()).count;
+    await sw.evaluate((u) => self.onMenuClick({ menuItemId: 'hide-selection', selectionText: 'Account statement', pageUrl: u }), url);
+    await waitFor(async () => (await getSettings()).customWords.includes('Account statement'), 'word added');
+    await waitFor(async () => (await masked()).count > before, 'selected text now covered');
+    await sw.evaluate((u) => self.onMenuClick({ menuItemId: 'curtain-site', pageUrl: u }), url);
+    await waitFor(async () => (await getSettings()).curtainSites.includes('localhost'), 'curtain via menu');
+    await sw.evaluate((u) => self.onMenuClick({ menuItemId: 'allow-site', pageUrl: u }), url);
+    await waitFor(async () => (await getSettings()).allowSites.includes('localhost'), 'never-hide via menu');
+    await setSettings({ customWords: [], curtainSites: [], allowSites: [] });
+    await waitFor(async () => (await masked()).active === true, 'back to normal');
+  });
+
+  await step('toolbar badge and tooltip follow the state', async () => {
+    await sw.evaluate(() => refreshAction()); // throws if an icon can't be loaded
+    const n = await waitFor(async () => {
+      const x = (await masked()).count;
+      const b = await sw.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), demoTab);
+      // the badge counts the whole tab (top page + iframes), so it is at least the top frame's count
+      return x > 0 && Number(b) >= x && Number(b);
+    }, 'badge shows the tab count');
+    assert.ok(n > 0);
+    assert.match(await sw.evaluate(() => chrome.action.getTitle({})), /hiding sensitive details/);
+    await setSettings({ badge: false });
+    await waitFor(async () => (await sw.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), demoTab)) === '', 'badge hidden');
+    await setSettings({ badge: true, mode: 'sharing' });
+    await waitFor(async () => /ready/.test(await sw.evaluate(() => chrome.action.getTitle({}))), 'ready tooltip');
+    await setSettings({ enabled: false, mode: 'always' });
+    await waitFor(async () => /off/.test(await sw.evaluate(() => chrome.action.getTitle({}))), 'off tooltip');
+    await setSettings({ enabled: true });
+  });
+
+  await step('settings page: every control works', async () => {
+    const o = await ctx.newPage();
+    watchErrors(o);
+    await o.setViewportSize({ width: 1280, height: 900 });
+    await o.goto(`chrome-extension://${extId}/src/options/options.html`);
+    await o.waitForTimeout(400);
+
+    // detectors: turning Emails off uncovers emails on the page
+    const all = (await masked()).count;
+    await o.click('[data-detector="email"]');
+    await waitFor(async () => (await masked()).count < all, 'emails uncovered');
+    await o.click('[data-detector="email"]');
+    await waitFor(async () => (await masked()).count === all, 'emails covered again');
+
+    // your words
+    await o.fill('#wordsInput', 'Ananya Kapoor');
+    await o.press('#wordsInput', 'Enter');
+    await o.fill('#wordsInput', 'Demo Mail');
+    await o.press('#wordsInput', 'Enter');
+    await waitFor(async () => (await getSettings()).customWords.length === 2, 'two words');
+    await waitFor(async () => (await masked()).count > all, 'words covered on the page');
+    // patterns: an invalid one is refused, a valid one is saved and used
+    await o.click('.disclosure summary');
+    await o.fill('#patternsInput', '/(/');
+    await o.press('#patternsInput', 'Enter');
+    await o.waitForTimeout(200);
+    assert.equal((await getSettings()).customPatterns.length, 0, 'invalid pattern refused');
+    assert.match(await o.textContent('#toast'), /Pattern error/);
+    await o.fill('#patternsInput', '/#\\d{6}/');
+    await o.press('#patternsInput', 'Enter');
+    await waitFor(async () => (await getSettings()).customPatterns.length === 1, 'pattern saved');
+
+    // sites
+    await o.fill('#curtainInput', 'https://vault.example.com/login');
+    await o.press('#curtainInput', 'Enter');
+    await o.fill('#allowInput', 'intranet.example.com');
+    await o.press('#allowInput', 'Enter');
+    await waitFor(async () => {
+      const s = await getSettings();
+      return s.curtainSites.includes('vault.example.com') && s.allowSites.includes('intranet.example.com');
+    }, 'site lists (URL cleaned to a host)');
+
+    // more places
+    await o.click('[data-key="titles"]');
+    await waitFor(() => page.evaluate(() => /raktim/.test(document.title)), 'title restored when off');
+    await o.click('[data-key="titles"]');
+    await waitFor(() => page.evaluate(() => !/raktim/.test(document.title)), 'title cleaned again');
+    await o.click('[data-key="fields"]');
+    await waitFor(() => page.evaluate(() => !document.querySelector('[data-cloakdesk-field]')), 'fields uncovered when off');
+    await o.click('[data-key="fields"]');
+    await waitFor(() => page.evaluate(() => !!document.querySelector('[data-cloakdesk-field]')), 'fields covered again');
+
+    // appearance + preview
+    await o.click('[data-style="blur"]');
+    await waitFor(async () => (await getSettings()).style === 'blur', 'frosted');
+    await o.click('[data-color="#111113"]');
+    await waitFor(async () => (await getSettings()).color === '#111113', 'obsidian');
+    await o.click('[data-style="redact"]');
+    await o.click('[data-color="#c9ccd2"]');
+    await waitFor(async () => (await getSettings()).color === '#c9ccd2' && (await getSettings()).style === 'redact', 'back to solid silver');
+    await o.click('[data-pv="you"]');
+    assert.equal(await o.evaluate(() => CSS.highlights.size), 0, 'preview shows the original');
+    await o.click('[data-pv="viewer"]');
+    assert.equal(await o.evaluate(() => CSS.highlights.size), 1, 'preview covered again');
+
+    // screenshots of each section, filled in
+    for (const id of ['general', 'detection', 'words', 'more', 'sites', 'appearance', 'privacy', 'data']) {
+      await o.evaluate((x) => document.getElementById(x).scrollIntoView({ block: 'start', behavior: 'instant' }), id);
+      await o.waitForTimeout(150);
+      await o.locator('#' + id).screenshot({ path: path.join(OUT, `2${['general', 'detection', 'words', 'more', 'sites', 'appearance', 'privacy', 'data'].indexOf(id)}-settings-${id}.png`) });
+    }
+
+    // export, then reset, then import restores
+    const dl = o.waitForEvent('download');
+    await o.click('#exportBtn');
+    const file = await (await dl).path();
+    const exported = JSON.parse(fs.readFileSync(file, 'utf8'));
+    assert.equal(exported.app, 'cloak-desk-browser');
+    assert.equal(exported.settings.customWords.length, 2);
+    o.once('dialog', (d) => d.accept());
+    await o.click('#resetBtn');
+    await waitFor(async () => (await getSettings()).customWords.length === 0, 'reset cleared words');
+    assert.equal((await getSettings()).enabled, true, 'reset keeps protection on');
+    const importPath = path.join(OUT, 'import.json');
+    fs.writeFileSync(importPath, JSON.stringify(exported));
+    await o.setInputFiles('#importFile', importPath);
+    await waitFor(async () => (await getSettings()).customWords.length === 2, 'import restored words');
+    fs.writeFileSync(importPath, 'not json');
+    await o.setInputFiles('#importFile', importPath);
+    await waitFor(async () => /isn’t a Cloak Desk settings file/.test(await o.textContent('#toast')), 'bad file refused');
+    fs.unlinkSync(importPath);
+    await o.close();
+    await setSettings({ customWords: [], customPatterns: [], curtainSites: [], allowSites: [] });
+  });
+
+  await step('cover styles and colors on a real page', async () => {
+    await page.bringToFront();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const clip = { x: 110, y: 80, width: 860, height: 300 };
+    const shots = {};
+    for (const [name, style, color] of [
+      ['solid-silver', 'redact', '#c9ccd2'],
+      ['frosted-silver', 'blur', '#c9ccd2'],
+      ['tint-silver', 'tint', '#c9ccd2'],
+      ['solid-obsidian', 'redact', '#111113'],
+      ['solid-white', 'redact', '#f4f4f5'],
+    ]) {
+      await setSettings({ style, color });
+      await page.waitForTimeout(350);
+      shots[name] = await page.screenshot({ clip, path: path.join(OUT, `3${Object.keys(shots).length}-cover-${name}.png`) });
+    }
+    const names = Object.keys(shots);
+    for (let i = 1; i < names.length; i++) assert.ok(!shots[names[i]].equals(shots[names[i - 1]]), `${names[i]} looks different from ${names[i - 1]}`);
+    await setSettings({ style: 'redact', color: '#c9ccd2' });
+  });
+
+  await step('demo page before and after', async () => {
+    await setSettings({ enabled: false });
+    await waitFor(async () => (await masked()).active === false, 'off');
+    await page.screenshot({ path: path.join(OUT, '40-demo-without-cloak-desk.png'), fullPage: true });
+    await setSettings({ enabled: true });
+    await waitFor(async () => (await masked()).active === true, 'on');
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: path.join(OUT, '41-demo-with-cloak-desk.png'), fullPage: true });
+  });
+
   await step('extension pages log no errors (CSP, scripts)', async () => {
     assert.deepEqual(errors, []);
   });

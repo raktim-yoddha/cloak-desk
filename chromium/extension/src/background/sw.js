@@ -75,9 +75,9 @@ function hostOf(url) {
 // ---------- icon, tooltip, badge ----------
 
 const ICONS = {
-  off: { 16: 'icons/off-16.png', 32: 'icons/off-32.png', 48: 'icons/off-48.png' },
-  armed: { 16: 'icons/armed-16.png', 32: 'icons/armed-32.png', 48: 'icons/armed-48.png' },
-  on: { 16: 'icons/on-16.png', 32: 'icons/on-32.png', 48: 'icons/on-48.png' },
+  off: { 16: '/icons/off-16.png', 32: '/icons/off-32.png', 48: '/icons/off-48.png' },
+  armed: { 16: '/icons/armed-16.png', 32: '/icons/armed-32.png', 48: '/icons/armed-48.png' },
+  on: { 16: '/icons/on-16.png', 32: '/icons/on-32.png', 48: '/icons/on-48.png' },
 };
 
 async function refreshAction() {
@@ -178,7 +178,8 @@ function createMenus() {
   });
 }
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+// Named so the end-to-end test can drive it: Chrome's native menu can't be clicked by automation.
+function onMenuClick(info, tab) {
   const host = hostOf(info.pageUrl || (tab && tab.url) || '');
   if (info.menuItemId === 'hide-selection') {
     const text = String(info.selectionText || '').trim().slice(0, 200);
@@ -188,7 +189,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   } else if (info.menuItemId === 'allow-site' && host) {
     updateSettings((s) => ({ allowSites: [...s.allowSites, S.normalizeSite(host)] }));
   }
-});
+}
+chrome.contextMenus.onClicked.addListener(onMenuClick);
+self.onMenuClick = onMenuClick;
 
 // ---------- install / startup ----------
 
@@ -231,13 +234,17 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 // ---------- shortcut ----------
 
-chrome.commands.onCommand.addListener((command) => {
+// Named for the same reason: automation can't press browser-level shortcuts.
+function onCommand(command) {
   if (command === 'toggle-cloak') updateSettings((s) => ({ enabled: !s.enabled, onboarded: true }));
-});
+}
+chrome.commands.onCommand.addListener(onCommand);
+self.onCommand = onCommand;
 
 // ---------- messages ----------
 
-const fromExtensionPage = (sender) => !sender.tab && sender.url && sender.url.startsWith(chrome.runtime.getURL(''));
+// The popup and settings page (also when opened in a tab). Content scripts report the page's own URL, never ours.
+const fromExtensionPage = (sender) => !!sender.url && sender.url.startsWith(chrome.runtime.getURL(''));
 
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (sender.id !== chrome.runtime.id || !msg || typeof msg.type !== 'string') return;
@@ -278,7 +285,8 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
     case 'tab-count': {
       if (!fromExtensionPage(sender)) return;
       const frames = counts.get(msg.tabId);
-      reply({ count: frames ? [...frames.values()].reduce((a, b) => a + b, 0) : null });
+      // null = no report yet (e.g. protection was just turned on); the popup then asks the page itself
+      reply({ count: frames && frames.size ? [...frames.values()].reduce((a, b) => a + b, 0) : null });
       return;
     }
     case 'reset-sharing': {

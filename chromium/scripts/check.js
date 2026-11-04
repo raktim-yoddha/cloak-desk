@@ -60,6 +60,8 @@ for (const file of files.filter((f) => /\.(js|html|css)$/.test(f))) {
   if (/\son[a-z]+\s*=\s*["']/.test(src) && rel.endsWith('.html')) fail(`${rel}: no inline event handlers`);
   if (rel.endsWith('.js') && /innerHTML\s*=/.test(src) && rel !== path.join('src', 'ui', 'icons.js')) fail(`${rel}: innerHTML only in icons.js (static SVG)`);
   if (/chrome\.storage\.sync/.test(src)) fail(`${rel}: settings must stay local (no storage.sync)`);
+  // the service worker lives in src/background/, so relative icon paths would resolve there and fail to load
+  if (rel === path.join('src', 'background', 'sw.js') && /['"]icons\//.test(src)) fail(`${rel}: icon paths must start with / (extension root)`);
 }
 
 if (problems.length) {

@@ -41,6 +41,7 @@
   // ---------- render ----------
 
   let current = null;
+  let countTimer = 0;
 
   async function render({ settings, runtime }) {
     current = settings;
@@ -68,8 +69,15 @@
       text.textContent = 'Waiting for a screen share';
     }
     if (active && host) {
-      const n = await tabCount();
-      if (n != null) text.textContent += n ? ` · ${n} on this page` : ' · nothing on this page';
+      const base = text.textContent;
+      const showCount = async () => {
+        const n = await tabCount();
+        if (n != null) text.textContent = base + (n ? ` · ${n} on this page` : ' · nothing on this page');
+      };
+      await showCount();
+      // a page that just turned on reports its count a moment later
+      clearTimeout(countTimer);
+      countTimer = setTimeout(showCount, 600);
     }
     $('resetShare').hidden = !sharing;
 
