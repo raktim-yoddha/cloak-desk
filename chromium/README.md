@@ -1,9 +1,9 @@
 # Cloak Desk Browser Safety (Chrome, Edge, Brave and other Chromium browsers)
 
 Hides email addresses, phone numbers, card numbers, IDs, API keys and your own words on every web page
-while you stream or share your screen. You keep working normally; viewers see a bar where the detail was.
+while you stream or share your screen. The covers show on your screen too, so you always see exactly what viewers see.
 
-![Popup in light and dark mode](docs/popup.png)
+<img src="docs/popup.png" alt="Popup" width="320">
 
 It is the browser half of Cloak Desk: [Cloak Desk for Windows](../windows/README.md) curtains whole apps,
 and this extension hides the details *inside* web pages.
@@ -59,7 +59,7 @@ Each one can be switched off. Select text on any page, right-click and choose **
 - **Curtain sites**: pages such as your password manager or bank are covered completely
   (password manager sites are on the list by default).
   ![Curtain](docs/curtain.png)
-- **Never-hide sites**, three mask styles (Redact, Frosted, Tint) and any color, export/import of settings.
+- **Never-hide sites**, three cover styles (Solid, Frosted, Tint) in silver or any color, export/import of settings.
 
 ### When to hide
 
@@ -107,6 +107,8 @@ Code map:
 - Messages from pages are validated; only extension pages can query or reset state.
 
 Full policy: [PRIVACY.md](PRIVACY.md).
+
+Type is [Geist](https://github.com/vercel/geist-font) (SIL Open Font License, `extension/fonts/OFL.txt`), bundled so nothing is fetched at runtime.
 
 ### Limits
 

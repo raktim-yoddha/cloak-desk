@@ -5,9 +5,9 @@
 
   I.hydrate(document);
 
-  const SHORT = { email: 'Emails', phone: 'Phones', card: 'Cards', iban: 'Bank', govid: 'IDs', secrets: 'Keys', ip: 'IPs', crypto: 'Wallets' };
+  const SHORT = { email: 'Emails', phone: 'Phones', card: 'Cards', iban: 'IBANs', govid: 'IDs', secrets: 'Keys', ip: 'IPs', crypto: 'Wallets' };
 
-  // ---------- active tab ----------
+  // ---------- tab ----------
 
   let tab = null;
   let host = '';
@@ -38,25 +38,6 @@
     }
   }
 
-  // ---------- chips ----------
-
-  const chips = $('chips');
-  for (const det of D.list) {
-    const b = document.createElement('button');
-    b.className = 'chip';
-    b.dataset.id = det.id;
-    b.title = `${det.label}: ${det.hint}`;
-    b.append(I.el(I.DETECTOR_ICONS[det.id]), document.createTextNode(SHORT[det.id] || det.label));
-    b.addEventListener('click', () => store.update((s) => ({ detectors: Object.assign({}, s.detectors, { [det.id]: !s.detectors[det.id] }) })));
-    chips.append(b);
-  }
-  const customChip = document.createElement('button');
-  customChip.className = 'chip';
-  customChip.append(I.el('text'), document.createTextNode('Your words'));
-  customChip.title = 'Names, addresses and anything else you add in settings';
-  customChip.addEventListener('click', () => openSettings('#words'));
-  chips.append(customChip);
-
   // ---------- render ----------
 
   let current = null;
@@ -66,59 +47,51 @@
     const sharing = runtime.sharing > 0;
     const allowed = S.hostMatches(host, settings.allowSites);
     const active = S.isActive(settings, sharing, host);
-    const state = !settings.enabled ? 'off' : active ? 'on' : allowed && (settings.mode === 'always' || sharing) ? 'paused' : 'armed';
 
-    const hero = $('hero');
-    hero.dataset.state = state === 'paused' ? 'off' : state;
     $('master').setAttribute('aria-checked', String(settings.enabled));
 
-    const title = $('heroTitle');
-    const sub = $('heroSub');
-    if (state === 'off') {
-      title.textContent = 'Protection is off';
-      sub.textContent = 'Turn on to hide emails, numbers and keys on screen';
-    } else if (state === 'paused') {
-      title.textContent = 'Paused on this site';
-      sub.textContent = `${site} is on your never-hide list`;
-    } else if (state === 'armed') {
-      title.textContent = 'Ready';
-      sub.textContent = 'Hides details the moment this browser shares your screen';
+    const dot = $('dot');
+    const text = $('statusText');
+    dot.className = 'dot';
+    if (!settings.enabled) {
+      text.textContent = 'Off';
+    } else if (sharing && active) {
+      dot.classList.add('live');
+      text.textContent = 'Screen share detected';
+    } else if (active) {
+      dot.classList.add('on');
+      text.textContent = 'Hiding sensitive details';
+    } else if (allowed && (settings.mode === 'always' || sharing)) {
+      text.textContent = `Paused on ${site}`;
     } else {
-      title.textContent = sharing ? 'Protecting your share' : 'Protection is on';
-      sub.textContent = sharing ? 'Viewers won’t see sensitive details' : 'Sensitive details are hidden on every page';
+      dot.classList.add('armed');
+      text.textContent = 'Waiting for a screen share';
     }
-
-    $('livePill').hidden = !sharing;
+    if (active && host) {
+      const n = await tabCount();
+      if (n != null) text.textContent += n ? ` · ${n} on this page` : ' · nothing on this page';
+    }
     $('resetShare').hidden = !sharing;
 
-    const pill = $('countPill');
-    if (state === 'on' && host) {
-      const n = await tabCount();
-      pill.hidden = n == null;
-      if (n != null) pill.textContent = n === 0 ? 'Nothing sensitive on this page' : `${n} hidden on this page`;
-    } else pill.hidden = true;
-
     for (const b of $('mode').querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset.mode === settings.mode));
-    $('modeHint').textContent =
+    $('modeNote').textContent =
       settings.mode === 'always'
-        ? 'Best for OBS, Zoom, Teams or Discord apps: they share your screen from outside the browser.'
-        : 'Turns on by itself when Meet, Teams, Zoom or any site in this browser starts sharing.';
+        ? 'Use Always for OBS, Zoom or Discord apps. They share from outside the browser.'
+        : 'Starts when a tab like Meet or Teams shares your screen, stops when it ends.';
 
-    const siteBlock = $('siteBlock');
+    $('site').hidden = !host;
+    $('noSite').hidden = !!host;
     if (host) {
-      $('siteHost').textContent = site;
+      $('host').textContent = site;
       $('siteSwitch').setAttribute('aria-checked', String(!allowed));
       $('curtainSwitch').setAttribute('aria-checked', String(S.hostMatches(host, settings.curtainSites)));
-      siteBlock.classList.remove('disabled');
-      $('siteNote').hidden = true;
-    } else {
-      $('siteHost').textContent = '';
-      siteBlock.classList.add('disabled');
-      $('siteNote').hidden = false;
     }
 
-    for (const b of chips.querySelectorAll('[data-id]')) b.setAttribute('aria-pressed', String(!!settings.detectors[b.dataset.id]));
-    customChip.setAttribute('aria-pressed', String(settings.customWords.length + settings.customPatterns.length > 0));
+    const on = D.list.filter((d) => settings.detectors[d.id]).map((d) => SHORT[d.id]);
+    const extra = settings.customWords.length + settings.customPatterns.length;
+    let summary = on.length === D.list.length ? 'Everything' : on.length ? on.slice(0, 2).join(', ') + (on.length > 2 ? ` +${on.length - 2}` : '') : 'Nothing';
+    if (extra) summary += ` · ${extra} word${extra === 1 ? '' : 's'}`;
+    $('detectSummary').textContent = summary;
   }
 
   store.watch(render);
@@ -127,9 +100,7 @@
 
   $('master').addEventListener('click', () => store.update((s) => ({ enabled: !s.enabled, onboarded: true })));
 
-  for (const b of $('mode').querySelectorAll('button')) {
-    b.addEventListener('click', () => store.update({ mode: b.dataset.mode }));
-  }
+  for (const b of $('mode').querySelectorAll('button')) b.addEventListener('click', () => store.update({ mode: b.dataset.mode }));
   $('mode').addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     const next = current && current.mode === 'always' ? 'sharing' : 'always';
@@ -159,34 +130,29 @@
     window.close();
   }
   $('openSettings').addEventListener('click', () => openSettings());
-  $('more').addEventListener('click', (e) => {
-    e.preventDefault();
-    openSettings();
-  });
+  $('more').addEventListener('click', () => openSettings());
+  $('detecting').addEventListener('click', () => openSettings('#detection'));
 
   // ---------- shortcut ----------
 
+  const sc = $('shortcut');
   try {
-    const cmds = await chrome.commands.getAll();
-    const c = cmds.find((x) => x.name === 'toggle-cloak');
-    const sc = $('shortcut');
+    const c = (await chrome.commands.getAll()).find((x) => x.name === 'toggle-cloak');
     if (c && c.shortcut) {
-      for (const [i, k] of c.shortcut.split('+').entries()) {
-        if (i) sc.append('+');
+      const keys = document.createElement('span');
+      keys.className = 'keys';
+      for (const k of c.shortcut.split('+')) {
         const kbd = document.createElement('kbd');
         kbd.textContent = k;
-        sc.append(kbd);
+        keys.append(kbd);
       }
-      sc.append(' on / off');
+      sc.append(keys, 'to toggle');
     } else {
-      const a = document.createElement('a');
-      a.href = '#';
-      a.textContent = 'Set a shortcut';
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        chrome.tabs.create({ url: 'chrome://extensions/shortcuts' });
-      });
-      sc.append(a);
+      const b = document.createElement('button');
+      b.className = 'link';
+      b.textContent = 'Set a shortcut';
+      b.addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
+      sc.append(b);
     }
   } catch (_) {
     /* ignore */

@@ -182,55 +182,56 @@
     host.setAttribute(M.UI_ATTR, '');
     // CSSOM (not a style attribute or <style> tag) so strict page CSPs can't block it
     host.style.cssText =
-      'all:initial!important;position:fixed!important;inset:0!important;z-index:2147483647!important;display:block!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;padding:0!important;background:#0d0b16!important;';
+      'all:initial!important;position:fixed!important;inset:0!important;z-index:2147483647!important;display:block!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;padding:0!important;background:#0a0a0a!important;';
     const root = host.attachShadow({ mode: 'closed' });
     const sheet = new CSSStyleSheet();
+    // Near-black drape: soft vertical folds, one quiet message. System fonts: pages can't load the extension's.
     sheet.replaceSync(`
       :host{all:initial}
-      .wrap{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;
-        font:15px/1.5 "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:#f2f0ff;
-        background:radial-gradient(1200px 600px at 15% 10%,rgba(91,69,255,.45),transparent 60%),
-                   radial-gradient(900px 600px at 90% 90%,rgba(192,107,255,.35),transparent 60%),#0d0b16}
-      .folds{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 2px,transparent 2px 64px),
-        repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 32px,transparent 32px 64px);mask:linear-gradient(#000,transparent 85%)}
-      .card{position:relative;text-align:center;padding:36px 44px;max-width:440px;border-radius:24px;
-        background:rgba(23,20,42,.72);border:1px solid rgba(255,255,255,.09);box-shadow:0 30px 80px -20px rgba(0,0,0,.6);backdrop-filter:blur(8px)}
-      .logo{width:64px;height:64px;margin:0 auto 18px;border-radius:18px;display:grid;place-items:center;
-        background:linear-gradient(135deg,#5b45ff,#8b5cf6 55%,#c06bff);box-shadow:0 12px 30px -8px rgba(124,92,255,.7)}
-      h1{font:600 22px/1.25 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;margin:0 0 8px;letter-spacing:-.01em}
-      p{margin:0;color:#b3aed0}
-      .site{display:inline-block;margin-top:16px;padding:4px 12px;border-radius:99px;background:rgba(255,255,255,.07);color:#d9d4ff;font-size:13px}`);
+      .wrap{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background:#0a0a0a;
+        font:14px/1.55 "Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#ededed;
+        -webkit-font-smoothing:antialiased}
+      .folds{position:absolute;inset:-2px 0 0;
+        background:repeating-linear-gradient(90deg,
+          rgba(255,255,255,.000) 0px, rgba(255,255,255,.028) 34px, rgba(255,255,255,.000) 68px,
+          rgba(0,0,0,.35) 96px, rgba(255,255,255,.000) 120px);
+        mask:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 55%,transparent 100%)}
+      .rod{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent)}
+      .msg{position:relative;display:grid;justify-items:center;gap:6px;max-width:360px;padding:24px;text-align:center}
+      svg{margin-bottom:14px}
+      h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.02em}
+      p{margin:0;color:#a1a1a1}
+      .site{margin-top:10px;font:12px ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#878787}`);
     root.adoptedStyleSheets = [sheet];
     const wrap = document.createElement('div');
     wrap.className = 'wrap';
     const folds = document.createElement('div');
     folds.className = 'folds';
-    const card = document.createElement('div');
-    card.className = 'card';
-    const logo = document.createElement('div');
-    logo.className = 'logo';
+    const rod = document.createElement('div');
+    rod.className = 'rod';
+    const msg = document.createElement('div');
+    msg.className = 'msg';
     // built node by node: pages with Trusted Types would reject innerHTML
     const NSVG = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NSVG, 'svg');
-    svg.setAttribute('width', '34');
-    svg.setAttribute('height', '34');
+    svg.setAttribute('width', '28');
+    svg.setAttribute('height', '28');
     svg.setAttribute('viewBox', '0 0 24 24');
-    for (const d of ['M3 4.5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v.7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z', 'M4.2 6.2h7.5v14H4.2z', 'M12.3 6.2h7.5v14h-7.5z']) {
+    for (const d of ['M3 3.5h18v1.6H3z', 'M4.2 5.1h7.4v15.4H4.2z', 'M12.4 5.1h7.4v15.4h-7.4z']) {
       const path = document.createElementNS(NSVG, 'path');
       path.setAttribute('d', d);
-      path.setAttribute('fill', '#fff');
+      path.setAttribute('fill', '#d9dbe0');
       svg.append(path);
     }
-    logo.append(svg);
     const h1 = document.createElement('h1');
-    h1.textContent = 'This page is behind the curtain';
+    h1.textContent = 'Hidden while you share';
     const p = document.createElement('p');
-    p.textContent = 'Cloak Desk covers it while you share your screen. Turn it off from the Cloak Desk button in the toolbar.';
+    p.textContent = 'This site is on your Cloak Desk cover list. Use the toolbar button to show it.';
     const siteEl = document.createElement('span');
     siteEl.className = 'site';
     siteEl.textContent = HOST.replace(/^www\./, '');
-    card.append(logo, h1, p, siteEl);
-    wrap.append(folds, card);
+    msg.append(svg, h1, p, siteEl);
+    wrap.append(folds, rod, msg);
     root.append(wrap);
     return host;
   }

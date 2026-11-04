@@ -38,6 +38,7 @@ const server = http.createServer((req, res) => {
   const ctx = await chromium.launchPersistentContext('', {
     channel: 'chromium',
     viewport: { width: 1280, height: 900 },
+    deviceScaleFactor: 2,
     args: [
       `--disable-extensions-except=${EXT}`,
       `--load-extension=${EXT}`,
@@ -266,23 +267,23 @@ const server = http.createServer((req, res) => {
   };
 
   await step('popup renders', async () => {
-    for (const scheme of ['light', 'dark']) {
+    for (const scheme of ['dark']) {
       const p = await ctx.newPage();
       watchErrors(p);
       await p.emulateMedia({ colorScheme: scheme });
-      await p.setViewportSize({ width: 372, height: 640 });
+      await p.setViewportSize({ width: 320, height: 640 });
       const tabId = await sw.evaluate(async (u) => (await chrome.tabs.query({ url: u + '*' }))[0].id, url);
       await p.goto(`chrome-extension://${extId}/src/popup/popup.html?tab=${tabId}`);
       await p.waitForTimeout(400);
       const h = await p.evaluate(() => document.body.scrollHeight);
-      await p.setViewportSize({ width: 372, height: h });
+      await p.setViewportSize({ width: 320, height: h });
       await p.screenshot({ path: path.join(OUT, `06-popup-${scheme}.png`) });
       await p.close();
     }
   });
 
   await step('settings page renders', async () => {
-    for (const scheme of ['light', 'dark']) {
+    for (const scheme of ['dark']) {
       const p = await ctx.newPage();
       watchErrors(p);
       await p.emulateMedia({ colorScheme: scheme });

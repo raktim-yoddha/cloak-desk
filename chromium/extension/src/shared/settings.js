@@ -30,7 +30,7 @@
     /** Sites covered by a full-page curtain while hiding is active. */
     curtainSites: ['vault.bitwarden.com', 'my.1password.com', 'lastpass.com', 'passwords.google.com', 'dashlane.com'],
     style: 'redact',
-    color: '#4b3bff',
+    color: '#c9ccd2',
     badge: true,
     onboarded: false,
   });
@@ -50,7 +50,8 @@
     }
     if (MODES.includes(raw.mode)) s.mode = raw.mode;
     if (STYLES.includes(raw.style)) s.style = raw.style;
-    if (typeof raw.color === 'string' && /^#[0-9a-f]{6}$/i.test(raw.color)) s.color = raw.color.toLowerCase();
+    // '#4b3bff' was the 0.1 default (violet); anyone still on it moves to the new silver default
+    if (typeof raw.color === 'string' && /^#[0-9a-f]{6}$/i.test(raw.color) && raw.color.toLowerCase() !== '#4b3bff') s.color = raw.color.toLowerCase();
     if (raw.detectors && typeof raw.detectors === 'object') {
       for (const k of Object.keys(s.detectors)) if (typeof raw.detectors[k] === 'boolean') s.detectors[k] = raw.detectors[k];
     }

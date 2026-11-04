@@ -33,7 +33,7 @@
   const NAME_RE = /(e-?mail|phone|mobile|\btel\b|card.?num|cc.?num|\bcvv|\bcvc|\biban|\bssn\b|aadh?aar|\bpan(?:.?(?:no|number|card))?\b|passport|street|address|zip|postal|\botp\b|secret|token|api.?key|pass(?:word|wd|code|phrase)?\b|\bpwd\b|\bpin\b)/i;
 
   function hexToRgb(hex) {
-    const n = parseInt(String(hex || '#4b3bff').slice(1), 16);
+    const n = parseInt(String(hex || '#c9ccd2').slice(1), 16);
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(',');
   }
 
@@ -54,7 +54,7 @@
 
   // While a selection overlaps a mask, selected text is painted transparent too
   // (::selection paints above custom highlights and would otherwise reveal it).
-  const GUARD_CSS = '::selection{color:transparent!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important;background-color:rgba(91,69,255,.22)!important;}';
+  const GUARD_CSS = '::selection{color:transparent!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important;background-color:rgba(160,164,172,.28)!important;}';
 
   /**
    * @param {{doc?:Document, scope?:Element, onCount?:(n:number)=>void, shadowOf?:(el:Element)=>ShadowRoot|null}} env
@@ -444,7 +444,7 @@
 
     function start(m, o) {
       matcher = m;
-      opts = Object.assign({ fields: true, style: 'redact', color: '#4b3bff' }, o || {});
+      opts = Object.assign({ fields: true, style: 'redact', color: '#c9ccd2' }, o || {});
       sheet.replaceSync(buildCss(opts.style, opts.color, hlName));
       if (!running) {
         running = true;

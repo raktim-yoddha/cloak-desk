@@ -95,9 +95,10 @@ async function refreshAction() {
   }
   await chrome.action.setIcon({ path: ICONS[state] });
   await chrome.action.setTitle({ title });
-  await chrome.action.setBadgeBackgroundColor({ color: sharing && state === 'on' ? '#e5484d' : '#5b45ff' });
+  const live = sharing && state === 'on';
+  await chrome.action.setBadgeBackgroundColor({ color: live ? '#ff4d4f' : '#ededed' });
   try {
-    await chrome.action.setBadgeTextColor({ color: '#ffffff' });
+    await chrome.action.setBadgeTextColor({ color: live ? '#ffffff' : '#0a0a0a' });
   } catch (_) {
     /* older Chrome */
   }

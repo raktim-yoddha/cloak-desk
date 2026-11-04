@@ -16,50 +16,41 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
   }
 
-  // ---------- detectors list ----------
+  // ---------- detectors ----------
 
-  const list = $('detectorList');
+  const detectorList = $('detectors');
   for (const det of D.list) {
     const row = document.createElement('div');
     row.className = 'row';
-    const ic = document.createElement('div');
-    ic.className = 'row-ic';
-    ic.append(I.el(I.DETECTOR_ICONS[det.id]));
     const text = document.createElement('div');
     text.className = 'row-text';
-    const title = document.createElement('div');
+    const title = document.createElement('span');
     title.className = 'row-title';
     title.textContent = det.label;
-    const sub = document.createElement('div');
-    sub.className = 'row-sub';
-    sub.textContent = det.hint;
-    const ex = document.createElement('div');
-    ex.className = 'row-example';
-    const exText = document.createElement('span');
-    exText.className = 'ex';
-    exText.textContent = det.example;
-    ex.append('e.g.', exText);
-    text.append(title, sub, ex);
+    const desc = document.createElement('p');
+    desc.className = 'row-desc';
+    desc.textContent = det.hint;
+    text.append(title, desc);
     const sw = document.createElement('button');
     sw.className = 'switch';
     sw.setAttribute('role', 'switch');
     sw.setAttribute('aria-label', det.label);
     sw.dataset.detector = det.id;
     sw.addEventListener('click', () => store.update((s) => ({ detectors: Object.assign({}, s.detectors, { [det.id]: !s.detectors[det.id] }) })));
-    row.append(ic, text, sw);
-    list.append(row);
+    row.append(text, sw);
+    detectorList.append(row);
   }
 
-  // ---------- tag inputs ----------
+  // ---------- tag fields ----------
 
-  function tagInput({ box, input, read, write, clean, check, cls }) {
+  function tagField({ box, input, read, write, clean, check, mono }) {
     let items = [];
     function draw(next) {
       items = next;
       for (const t of box.querySelectorAll('.tag')) t.remove();
       for (const value of items) {
         const tag = document.createElement('span');
-        tag.className = 'tag' + (cls ? ' ' + cls : '');
+        tag.className = 'tag' + (mono ? ' mono' : '');
         const err = check ? check(value) : '';
         if (err) {
           tag.classList.add('bad');
@@ -78,7 +69,7 @@
     }
     function commit() {
       const raw = input.value;
-      const values = (cls === 'pattern' ? [raw] : raw.split(/[\n,]/)).map((v) => (clean ? clean(v) : v.trim())).filter(Boolean);
+      const values = (mono ? [raw] : raw.split(/[\n,]/)).map((v) => (clean ? clean(v) : v.trim())).filter(Boolean);
       if (!values.length) {
         if (raw.trim()) toast('That doesn’t look valid');
         return;
@@ -94,7 +85,7 @@
       store.update((s) => write([...read(s), ...values]));
     }
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || (e.key === ',' && cls !== 'pattern')) {
+      if (e.key === 'Enter' || (e.key === ',' && !mono)) {
         e.preventDefault();
         commit();
       } else if (e.key === 'Backspace' && !input.value && items.length) {
@@ -107,19 +98,19 @@
     return { draw };
   }
 
-  const words = tagInput({
+  const words = tagField({
     box: $('wordsTags'),
     input: $('wordsInput'),
     read: (s) => s.customWords,
     write: (v) => ({ customWords: v }),
     check: (v) => (v.length < 2 ? 'Use at least 2 characters' : ''),
   });
-  const patterns = tagInput({
+  const patterns = tagField({
     box: $('patternsTags'),
     input: $('patternsInput'),
     read: (s) => s.customPatterns,
     write: (v) => ({ customPatterns: v }),
-    cls: 'pattern',
+    mono: true,
     check: (v) => {
       try {
         D.parsePattern(v);
@@ -130,19 +121,16 @@
     },
   });
   const siteClean = (v) => S.normalizeSite(v);
-  const curtainTags = tagInput({ box: $('curtainTags'), input: $('curtainInput'), read: (s) => s.curtainSites, write: (v) => ({ curtainSites: v }), clean: siteClean });
-  const allowTags = tagInput({ box: $('allowTags'), input: $('allowInput'), read: (s) => s.allowSites, write: (v) => ({ allowSites: v }), clean: siteClean });
+  const curtainTags = tagField({ box: $('curtainTags'), input: $('curtainInput'), read: (s) => s.curtainSites, write: (v) => ({ curtainSites: v }), clean: siteClean });
+  const allowTags = tagField({ box: $('allowTags'), input: $('allowInput'), read: (s) => s.allowSites, write: (v) => ({ allowSites: v }), clean: siteClean });
 
-  // ---------- look ----------
+  // ---------- appearance ----------
 
   const COLORS = [
-    ['#4b3bff', 'Violet'],
-    ['#15122a', 'Ink'],
-    ['#2563eb', 'Blue'],
-    ['#0f9d76', 'Teal'],
-    ['#e5484d', 'Red'],
-    ['#f59e0b', 'Amber'],
-    ['#64748b', 'Slate'],
+    ['#c9ccd2', 'Silver'],
+    ['#f4f4f5', 'White'],
+    ['#52525b', 'Graphite'],
+    ['#111113', 'Obsidian'],
   ];
   const swatches = $('swatches');
   for (const [c, name] of COLORS) {
@@ -159,6 +147,7 @@
   const custom = document.createElement('label');
   custom.className = 'swatch swatch-custom';
   custom.title = 'Custom color';
+  custom.append(I.el('plus'));
   const picker = document.createElement('input');
   picker.type = 'color';
   picker.setAttribute('aria-label', 'Custom color');
@@ -168,16 +157,13 @@
 
   for (const b of $('styles').querySelectorAll('[data-style]')) b.addEventListener('click', () => store.update({ style: b.dataset.style }));
 
-  // ---------- preview ----------
-
   const preview = M.createMasker({ doc: document, scope: $('previewBody') });
   let previewMode = 'viewer';
   let lastSettings = null;
   function runPreview() {
     if (!lastSettings) return;
-    if (previewMode === 'viewer') {
-      preview.start(D.createMatcher(lastSettings), { fields: lastSettings.fields, style: lastSettings.style, color: lastSettings.color });
-    } else preview.stop();
+    if (previewMode === 'viewer') preview.start(D.createMatcher(lastSettings), { fields: lastSettings.fields, style: lastSettings.style, color: lastSettings.color });
+    else preview.stop();
   }
   for (const b of document.querySelectorAll('[data-pv]')) {
     b.addEventListener('click', () => {
@@ -196,19 +182,17 @@
     const state = !settings.enabled ? 'off' : on ? (sharing ? 'live' : 'on') : 'armed';
 
     $('master').setAttribute('aria-checked', String(settings.enabled));
-    $('heroCard').dataset.state = state;
-    $('masterSub').textContent = {
-      off: 'Off. Turn on before you go live.',
-      on: 'On. Sensitive details are hidden on every page.',
-      live: 'On. A screen share was detected and your details are hidden.',
-      armed: 'Ready. Hiding starts when this browser shares your screen.',
+    $('masterDesc').textContent = {
+      off: 'Off. Nothing is covered.',
+      on: 'On. Sensitive details are covered on every page.',
+      live: 'On. A screen share is running and details are covered.',
+      armed: 'Ready. Covering starts when this browser shares your screen.',
     }[state];
-    const nav = $('navStatus');
-    nav.className = 'nav-status ' + state;
-    $('navStatusText').textContent = { off: 'Protection off', on: 'Protection on', live: 'Sharing, protected', armed: 'Ready for sharing' }[state];
+    $('navDot').className = 'dot' + (state === 'off' ? '' : ' ' + state);
+    $('navStatus').textContent = { off: 'Protection off', on: 'Protection on', live: 'Sharing, covered', armed: 'Waiting for a share' }[state];
 
     for (const b of $('mode').querySelectorAll('[data-mode]')) b.setAttribute('aria-checked', String(b.dataset.mode === settings.mode));
-    for (const b of list.querySelectorAll('[data-detector]')) b.setAttribute('aria-checked', String(!!settings.detectors[b.dataset.detector]));
+    for (const b of detectorList.querySelectorAll('[data-detector]')) b.setAttribute('aria-checked', String(!!settings.detectors[b.dataset.detector]));
     for (const b of document.querySelectorAll('[data-key]')) b.setAttribute('aria-checked', String(!!settings[b.dataset.key]));
 
     words.draw(settings.customWords);
@@ -224,20 +208,15 @@
       b.setAttribute('aria-checked', String(sel));
     }
     custom.setAttribute('aria-checked', String(!known));
-    if (!known) custom.style.setProperty('--c', settings.color);
+    custom.style.setProperty('--c', settings.color);
     picker.value = settings.color;
-    const n = parseInt(settings.color.slice(1), 16);
-    document.documentElement.style.setProperty('--mask', settings.color);
-    document.documentElement.style.setProperty('--mask-rgb', `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`);
 
     const welcome = $('welcome');
     if (!settings.onboarded || location.hash === '#welcome') welcome.hidden = false;
-    if (settings.enabled) {
-      const btn = $('welcomeEnable');
-      btn.textContent = '';
-      btn.append(I.el('check'), document.createTextNode('Protection is on'));
-      welcome.classList.add('done');
-    }
+    const enable = $('welcomeEnable');
+    enable.disabled = settings.enabled;
+    enable.textContent = settings.enabled ? 'Protection is on' : 'Turn on protection';
+
     runPreview();
   }
 
@@ -248,7 +227,7 @@
   $('master').addEventListener('click', () => store.update((s) => ({ enabled: !s.enabled, onboarded: true })));
   $('welcomeEnable').addEventListener('click', async () => {
     await store.update({ enabled: true, onboarded: true });
-    toast('Protection is on. Try sharing a tab.');
+    toast('Protection is on');
   });
   for (const b of $('mode').querySelectorAll('[data-mode]')) b.addEventListener('click', () => store.update({ mode: b.dataset.mode }));
   for (const b of document.querySelectorAll('[data-key]')) b.addEventListener('click', () => store.update((s) => ({ [b.dataset.key]: !s[b.dataset.key] })));
@@ -256,12 +235,19 @@
   $('shortcutBtn').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
   try {
     const c = (await chrome.commands.getAll()).find((x) => x.name === 'toggle-cloak');
-    $('shortcutText').textContent = c && c.shortcut ? `${c.shortcut} turns protection on or off` : 'No shortcut set. Pick one in Chrome’s shortcut settings.';
+    const keys = $('keys');
+    if (c && c.shortcut) {
+      for (const k of c.shortcut.split('+')) {
+        const kbd = document.createElement('kbd');
+        kbd.textContent = k;
+        keys.append(kbd);
+      }
+    } else keys.textContent = 'Not set';
   } catch (_) {
     /* ignore */
   }
 
-  // ---------- backup ----------
+  // ---------- data ----------
 
   $('exportBtn').addEventListener('click', async () => {
     const { settings } = await store.get();
@@ -293,12 +279,11 @@
     toast('Settings reset');
   });
 
-  $('version').textContent = `Cloak Desk Browser Safety ${chrome.runtime.getManifest().version} · works offline`;
+  $('version').textContent = `Version ${chrome.runtime.getManifest().version}`;
 
-  // ---------- nav highlight ----------
+  // ---------- current section in the sidebar ----------
 
-  const links = [...document.querySelectorAll('.nav nav a')];
-  const sections = links.map((a) => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const links = [...document.querySelectorAll('.side nav a')];
   const io = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
@@ -306,7 +291,10 @@
         for (const a of links) a.classList.toggle('current', a.getAttribute('href') === '#' + e.target.id);
       }
     },
-    { rootMargin: '-20% 0px -70% 0px' }
+    { rootMargin: '-15% 0px -75% 0px' }
   );
-  sections.forEach((s) => io.observe(s));
+  for (const a of links) {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) io.observe(target);
+  }
 })();

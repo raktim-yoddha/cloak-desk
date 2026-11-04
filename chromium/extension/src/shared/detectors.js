@@ -115,7 +115,7 @@
     {
       id: 'email',
       label: 'Email addresses',
-      hint: 'name@example.com, work and personal inboxes',
+      hint: 'Work and personal inboxes',
       example: 'raktim.yoddha@gmail.com',
       rules: [
         {
@@ -140,7 +140,7 @@
     {
       id: 'card',
       label: 'Payment cards',
-      hint: 'Visa, Mastercard, Amex, RuPay (checksum-verified)',
+      hint: 'Visa, Mastercard, Amex, RuPay',
       example: '4111 1111 1111 1111',
       rules: [
         {
@@ -153,7 +153,7 @@
     {
       id: 'iban',
       label: 'Bank accounts (IBAN)',
-      hint: 'International bank account numbers (checksum-verified)',
+      hint: 'International bank account numbers',
       example: 'GB82 WEST 1234 5698 7654 32',
       rules: [
         {
@@ -185,7 +185,7 @@
     {
       id: 'secrets',
       label: 'API keys, tokens & passwords',
-      hint: 'GitHub, AWS, Stripe, Google, OpenAI, Slack, JWTs, private keys, "password: …"',
+      hint: 'GitHub, AWS, Stripe, Google, OpenAI, Slack, JWTs, private keys, and password = … lines',
       example: 'ghp_8fK2xQ9mVt7Lr1ZsP0cWbN4yHd6Ue3Ja5Gk',
       rules: [
         {
@@ -219,7 +219,7 @@
     {
       id: 'ip',
       label: 'IP addresses',
-      hint: 'Your home or server IPv4 / IPv6 address',
+      hint: 'Home and server IPv4 or IPv6 addresses',
       example: '203.0.113.42',
       rules: [
         {

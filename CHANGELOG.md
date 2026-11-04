@@ -12,6 +12,7 @@ The release workflow publishes the section that matches the pushed tag as the re
 - Off after install; turn it on from the toolbar, the welcome page or `Alt+Shift+H`. Mode **Always** (for OBS and desktop apps) or **only while this browser shares the screen**, detected automatically.
 - Also hides what's typed in sensitive form fields, cleans tab titles, hides notification previews, and can curtain whole sites (password managers by default).
 - Pages are never modified (masks are painted with the CSS Custom Highlight API); iframes and shadow DOM are covered; new pages stay hidden until scanned; masks survive pages clearing highlights or stylesheets.
+- Dark, silver-accented interface set in Geist (bundled); silver covers by default. Covers also show on your own screen, so you see exactly what viewers see.
 - No network code, strict Content Security Policy, settings kept on the device. Static security checks, detector unit tests and a Chromium end-to-end test run in CI; releases include `CloakDesk-Browser-<version>.zip`.
 
 ## [0.1.0] - 2026-11-03
