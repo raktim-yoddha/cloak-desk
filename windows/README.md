@@ -5,7 +5,11 @@ WinUI 3 app in C# (.NET 10, NativeAOT), unpackaged. Needs Windows 10 2004 or lat
 ## Install
 
 Download `CloakDesk-Setup-<version>-x64.exe` (or `-arm64`) from [Releases](https://github.com/raktim-yoddha/cloak-desk/releases) and run it.
-It installs for your user only (no admin prompt). Nothing else is needed: the Windows App SDK runtime is bundled.
+It installs for your user only (no admin prompt). The app itself is about 8 MB: its WinUI interface comes from Microsoft's
+shared Windows App Runtime 1.8, installed once per PC and used by other apps too. If your PC doesn't have it yet, setup
+downloads it from Microsoft and installs it silently (this needs an internet connection once). Uninstalling Cloak Desk
+leaves the runtime in place.
+The portable zip needs the runtime too; if it's missing, the app shows Microsoft's prompt to install it.
 Prefer no installer? Unzip the `-portable.zip` anywhere and run `CloakDesk.exe`.
 
 Silent install: `CloakDesk-Setup-<version>-x64.exe /VERYSILENT /TASKS="startup"`.

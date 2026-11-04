@@ -20,7 +20,7 @@ First release: Cloak Desk for Windows and the Cloak Desk Browser Safety extensio
 - Tray first: left-click the icon for a compact panel (cloak, preset, hide desktop, start with Windows, open, exit); right-click for a quick menu. Optional start with Windows. Single instance.
 - Cloak Desk's own windows never appear in any screen capture.
 - Dark interface (WinUI 3): gray-tinted Mica window with acrylic panels, dark even when Windows is in light mode. Version shown in Settings > About.
-- Setup for x64 and ARM64 (`CloakDesk-Setup-0.1.0-<arch>.exe`): per-user install, no admin prompt, nothing else to install. Portable zips and SHA256 checksums.
+- Setup for x64 and ARM64 (`CloakDesk-Setup-0.1.0-<arch>.exe`): per-user install, no admin prompt. The app is about 8 MB and uses Microsoft's shared Windows App Runtime 1.8; setup installs the runtime when it's missing. Portable zips and SHA256 checksums.
 
 #### Cloak Desk Browser Safety (Chrome, Edge, Brave)
 - Hides emails, phone numbers, payment cards, IBANs, Aadhaar/PAN/SSN/NI numbers, API keys, tokens and passwords, IP addresses, crypto wallets and your own words on every web page while you stream or share. Checksums (Luhn, mod-97, Verhoeff) keep false alarms down.
