@@ -108,21 +108,21 @@ New-Item -ItemType Directory -Force $dataDir | Out-Null
     )
 } | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $dataDir 'presets.json') -Encoding UTF8
 
-# ---- Light theme ----
+# ---- Windows is set to light mode; Cloak Desk is dark only ----
 Launch $false
-WindowShot '01-light-preset-with-wallpaper-curtain'
+WindowShot '01-preset-with-image-curtain'
 
 Click (El 'name' 'Curtain color')
-WindowShot '02-light-curtain-color-picker' 40
+WindowShot '02-curtain-color-picker' 40
 [T]::Key(0x1B); Start-Sleep -Milliseconds 500
 
 $picker = El 'id' 'AppPicker'
 $picker.GetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern).Expand()
-WindowShot '03-light-hide-an-app-picker' 40
+WindowShot '03-hide-an-app-picker' 40
 [T]::Key(0x1B); Start-Sleep -Milliseconds 500
 
 Click (El 'name' 'Settings')
-WindowShot '04-light-settings'
+WindowShot '04-settings'
 Click (El 'name' 'Work meeting')
 Start-Sleep -Seconds 1
 
@@ -137,7 +137,7 @@ Shot '05-your-screen-notepad-is-private'
 [T]::SetForegroundWindow([T]::Find($app.Id, 'Cloak Desk')) | Out-Null
 Toggle (El 'id' 'CloakSwitch')
 for ($i = 0; $i -lt 30 -and ([T]::Find($app.Id, 'Cloak Desk Stage') -eq [IntPtr]::Zero); $i++) { Start-Sleep -Milliseconds 500 }
-WindowShot '06-light-cloak-on'
+WindowShot '06-cloak-on'
 $stage = [T]::Find($app.Id, 'Cloak Desk Stage')
 [T]::SetForegroundWindow($np.MainWindowHandle) | Out-Null
 Start-Sleep -Seconds 1
@@ -170,11 +170,13 @@ Start-Sleep -Milliseconds 500; [T]::Key(0x1B)
 $sw = El 'id' 'CloakSwitch'; if ($sw) { Toggle $sw }
 Stop-Process -Id $np.Id -Force -ErrorAction SilentlyContinue
 
-# ---- Dark theme ----
-Launch $true
-WindowShot '10-dark-preset'
-Click (El 'name' 'Settings')
-WindowShot '11-dark-settings'
+# Tray panel (left click on the icon), opened while cloaked.
+[T]::SetCursorPos(900, 700) | Out-Null
+[T]::PostMessageW($tray, 0x8001, [IntPtr]::Zero, [IntPtr]0x0202) | Out-Null
+Start-Sleep -Seconds 2
+Shot '10-tray-panel'
+[T]::PostMessageW($tray, 0x8001, [IntPtr]::Zero, [IntPtr]0x0202) | Out-Null
+Start-Sleep -Milliseconds 500
 
 Get-Process CloakDesk -ErrorAction SilentlyContinue | Stop-Process -Force
 Set-ItemProperty $personalize -Name AppsUseLightTheme -Value 1 -Type DWord

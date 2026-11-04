@@ -63,7 +63,7 @@ public sealed unsafe partial class Tray : IDisposable
         }
         if (msg == CallbackMessage)
         {
-            if ((uint)l == Native.WM_LBUTTONUP) _app.ShowWindow();
+            if ((uint)l == Native.WM_LBUTTONUP) _app.TogglePanel(); // compact panel; the full window is one click further
             else if ((uint)l == Native.WM_RBUTTONUP) ShowMenu();
             return 0;
         }

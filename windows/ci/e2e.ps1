@@ -18,6 +18,9 @@ public static class W {
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
     [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr FindWindowW(string cls, string title);
+    [DllImport("user32.dll")] public static extern bool PostMessageW(IntPtr h, uint m, IntPtr w, IntPtr l);
+    [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
     [DllImport("user32.dll")] static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
     public static List<string> Titles(int pid) {
         var list = new List<string>();
@@ -196,7 +199,32 @@ Step 'Settings' {
     Check 'Turning it off removes the Run key' ($null -eq (Get-ItemProperty $runKey -ErrorAction SilentlyContinue).CloakDesk)
 }
 
-# 7. Single instance, close to tray, tray start, reopen
+# 7. Tray panel: left click opens it, it controls the cloak, a second click closes it
+function Panel() {
+    $c = New-Object System.Windows.Automation.AndCondition((Prop $UIA::ProcessIdProperty $script:app.Id), (Prop $UIA::NameProperty 'Cloak Desk panel'))
+    $UIA::RootElement.FindFirst([System.Windows.Automation.TreeScope]::Children, $c)
+}
+function TrayClick() {
+    $tray = [W]::FindWindowW('CloakDeskTray', 'Cloak Desk')
+    [W]::PostMessageW($tray, 0x8001, [IntPtr]::Zero, [IntPtr]0x0202) | Out-Null # WM_LBUTTONUP on the icon
+}
+Step 'Tray panel' {
+    [W]::SetCursorPos(1200, 700) | Out-Null
+    TrayClick
+    Check 'Tray click opens the panel' (WaitFor { Panel } 10)
+    Start-Sleep -Seconds 1
+    Shot 'tray-panel'
+    $sw = (Panel).FindFirst([System.Windows.Automation.TreeScope]::Descendants, (Prop $UIA::NameProperty 'Cloak'))
+    Toggle $sw
+    Check 'Panel switch starts the Stage' (WaitFor { HasStage } 15)
+    Check 'Panel shows the cloak on' (WaitFor { IsOn ((Panel).FindFirst([System.Windows.Automation.TreeScope]::Descendants, (Prop $UIA::NameProperty 'Cloak'))) } 5)
+    Toggle ((Panel).FindFirst([System.Windows.Automation.TreeScope]::Descendants, (Prop $UIA::NameProperty 'Cloak')))
+    Check 'Panel switch stops the Stage' (WaitFor { -not (HasStage) } 10)
+    TrayClick
+    Check 'Second tray click closes the panel' (WaitFor { -not (Panel) } 5)
+}
+
+# 8. Single instance, close to tray, tray start, reopen
 Step 'Lifecycle' {
     $second = Start-App
     Check 'Second launch exits' (WaitFor { $second.HasExited } 15)

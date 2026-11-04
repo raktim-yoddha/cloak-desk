@@ -27,6 +27,8 @@ public partial class App : Application
     Stage? _stage;
     Tray? _tray;
     MainWindow? _window;
+    TrayPanel? _panel;
+    long _panelClosedAt;
 
     public App()
     {
@@ -89,6 +91,26 @@ public partial class App : Application
         Native.SetForegroundWindow(Win32Interop.GetWindowFromWindowId(_window.AppWindow.Id));
     }
 
+    /// Tray icon left click: open the compact panel, or close it if it's open.
+    public void TogglePanel()
+    {
+        if (_panel is not null)
+        {
+            _panel.Close();
+            return;
+        }
+        // Clicking the tray icon first takes focus from the panel, which closes it; don't reopen on that same click.
+        if (Environment.TickCount64 - _panelClosedAt < 300) return;
+        _panel = new TrayPanel();
+        _panel.Closed += (_, _) =>
+        {
+            _panel = null;
+            _panelClosedAt = Environment.TickCount64;
+        };
+        _panel.Activate();
+        Native.SetForegroundWindow(Win32Interop.GetWindowFromWindowId(_panel.AppWindow.Id));
+    }
+
     public void ToggleCloak()
     {
         Error = null;
@@ -147,6 +169,7 @@ public partial class App : Application
     {
         _stage?.Dispose();
         _tray?.Dispose();
+        _panel?.Close();
         _window?.Close();
         Exit();
     }

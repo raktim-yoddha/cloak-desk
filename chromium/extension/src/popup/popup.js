@@ -96,8 +96,8 @@
     $('mode').style.setProperty('--i', settings.mode === 'always' ? 0 : 1);
     $('modeNote').textContent =
       settings.mode === 'always'
-        ? 'Use Always for OBS, Zoom or Discord apps. They share from outside the browser.'
-        : 'Starts when a tab like Meet or Teams shares your screen, stops when it ends.';
+        ? 'For OBS, Zoom and other desktop apps.'
+        : 'Turns on when a tab shares your screen.';
 
     $('site').hidden = !host;
     $('noSite').hidden = !!host;

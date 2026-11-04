@@ -25,7 +25,7 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         if (MicaController.IsSupported()) SystemBackdrop = new GrayBackdrop();
-        else Root.Background = new SolidColorBrush((Color)Application.Current.Resources["GrayColor"]);
+        else Root.Background = new SolidColorBrush(GrayBackdrop.Gray);
 
         var icon = Path.Combine(AppContext.BaseDirectory, "Assets", "CloakDesk.ico");
         ExtendsContentIntoTitleBar = true;
@@ -35,6 +35,17 @@ public sealed partial class MainWindow : Window
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
 
         var hwnd = Win32Interop.GetWindowFromWindowId(AppWindow.Id);
+        // Dark only: with Windows in light mode the frame and caption buttons would otherwise be drawn light.
+        Native.DarkFrame(hwnd);
+        var bar = AppWindow.TitleBar;
+        bar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+        bar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+        bar.ButtonForegroundColor = Microsoft.UI.Colors.White;
+        bar.ButtonInactiveForegroundColor = Color.FromArgb(255, 0x8A, 0x8A, 0x8A);
+        bar.ButtonHoverForegroundColor = Microsoft.UI.Colors.White;
+        bar.ButtonHoverBackgroundColor = Color.FromArgb(255, 0x45, 0x45, 0x45);
+        bar.ButtonPressedForegroundColor = Microsoft.UI.Colors.White;
+        bar.ButtonPressedBackgroundColor = Color.FromArgb(255, 0x3A, 0x3A, 0x3A);
         // You see this window, viewers never do. CLOAKDESK_CAPTURABLE=1 turns that off for screenshots of the app itself.
         if (Environment.GetEnvironmentVariable("CLOAKDESK_CAPTURABLE") != "1")
             Native.SetWindowDisplayAffinity(hwnd, Native.WDA_EXCLUDEFROMCAPTURE);
@@ -47,7 +58,7 @@ public sealed partial class MainWindow : Window
         }
 
         StartupSwitch.IsOn = App.StartWithWindows;
-        HotkeyRow.Description = _app.Tray.HotkeyError ?? "Work in any app";
+        HotkeyRow.Description = _app.Tray.HotkeyError ?? "In any app";
         PresetsFileRow.Description = PresetFile.FilePath;
         VersionRow.Description = $"Version {App.Version}";
         _app.Changed += Refresh;
@@ -60,8 +71,8 @@ public sealed partial class MainWindow : Window
         SyncNav();
         CloakSwitch.IsOn = _app.IsCloaked;
         CloakRow.Description = _app.IsCloaked
-            ? "On. Share the “Cloak Desk Stage” window in your meeting or stream app."
-            : "Off. Turn on to start the Stage with this preset. Ctrl+Alt+C";
+            ? "On · Share the “Cloak Desk Stage” window"
+            : "Off · Ctrl+Alt+C";
         ErrorBar.Message = _app.Error ?? "";
         ErrorBar.IsOpen = _app.Error is not null;
         DeletePresetButton.IsEnabled = _app.Presets.Presets.Count > 1;
@@ -97,7 +108,7 @@ public sealed partial class MainWindow : Window
         var color = Color.FromArgb(255, r, g, b);
         ColorSwatch.Background = new SolidColorBrush(color);
         Picker.Color = color;
-        ImageRow.Description = p.Image is null ? "None. The curtain color is used." : Path.GetFileName(p.Image);
+        ImageRow.Description = p.Image is null ? "None" : Path.GetFileName(p.Image);
         RemoveImageButton.Visibility = p.Image is null ? Visibility.Collapsed : Visibility.Visible;
         DesktopSwitch.IsOn = p.Desktop;
         AppList.ItemsSource = p.Apps;

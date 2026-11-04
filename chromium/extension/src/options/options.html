@@ -32,15 +32,12 @@
         <section class="welcome panel" id="welcome" hidden>
           <div class="welcome-text">
             <h1>Hide what viewers shouldn't see</h1>
-            <p>
-              Cloak Desk covers emails, phone numbers, card numbers, IDs and API keys on every web page while you stream or share your screen.
-              The covers show on your screen too, so you always see exactly what your viewers see.
-            </p>
+            <p>Covers emails, phone numbers, cards, IDs and API keys on every page while you share your screen. You see the covers too.</p>
             <div class="actions">
               <button class="btn btn-primary" id="welcomeEnable">Turn on protection</button>
               <a class="btn btn-quiet" href="#appearance">See an example</a>
             </div>
-            <p class="hint">Pin it from the puzzle icon in Chrome's toolbar to reach it in one click.</p>
+            <p class="hint">Pin it from the puzzle icon in the toolbar.</p>
           </div>
           <div class="well welcome-viewer" id="welcomeViewer" aria-label="Preview of what viewers see">
             <span class="viewer-label">Viewers see</span>
@@ -64,7 +61,7 @@
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Keyboard shortcut</span>
-                <p class="row-desc">Turns protection on or off from any tab.</p>
+                <p class="row-desc">From any tab</p>
               </div>
               <span class="keys" id="keys"></span>
               <button class="btn" id="shortcutBtn">Change</button>
@@ -77,14 +74,14 @@
               <span class="radio" aria-hidden="true"></span>
               <span class="row-text">
                 <span class="row-title">Always</span>
-                <span class="row-desc">Whenever protection is on. Use this for OBS, Zoom, Teams or Discord apps, which share from outside the browser.</span>
+                <span class="row-desc">For OBS, Zoom and other desktop apps</span>
               </span>
             </button>
             <button class="row row-radio" role="radio" data-mode="sharing" aria-checked="false">
               <span class="radio" aria-hidden="true"></span>
               <span class="row-text">
                 <span class="row-title">Only while this browser shares</span>
-                <span class="row-desc">Starts when a tab such as Meet or Teams shares your screen, and stops when the share ends.</span>
+                <span class="row-desc">When a tab like Meet shares your screen</span>
               </span>
             </button>
           </div>
@@ -92,19 +89,19 @@
 
         <section id="detection">
           <h2>Detection</h2>
-          <p class="lead">Found in any text on a page, including chats, tables, code, editors and embedded frames. Cards, IBANs and Aadhaar numbers are checksum-verified, so ordinary numbers aren't covered.</p>
+          <p class="lead">Found anywhere on a page. Card, IBAN and Aadhaar numbers are checksum-verified.</p>
           <div class="list" id="detectors"></div>
         </section>
 
         <section id="words">
           <h2>Your words</h2>
-          <p class="lead">Your name, home address, company or client names. Matched anywhere, in any letter case.</p>
+          <p class="lead">Names, addresses, anything personal. Any letter case.</p>
           <div class="tags" id="wordsTags"><input id="wordsInput" placeholder="Add a word or phrase, then press Enter" autocomplete="off" spellcheck="false" aria-label="Add a word or phrase" /></div>
-          <p class="hint">You can also select text on any page, right-click, and choose “Always hide”.</p>
+          <p class="hint">Or select text on a page, right-click, Always hide.</p>
           <details class="disclosure">
             <summary>Patterns</summary>
             <div class="tags" id="patternsTags"><input id="patternsInput" placeholder="/EMP-\d{5}/" autocomplete="off" spellcheck="false" aria-label="Add a pattern" /></div>
-            <p class="hint">JavaScript regular expressions. Without slashes, matching ignores letter case.</p>
+            <p class="hint">JavaScript regular expressions</p>
           </details>
         </section>
 
@@ -114,28 +111,28 @@
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Form fields</span>
-                <p class="row-desc">Email, phone, card, address, password and token fields show dots, even after “show password”.</p>
+                <p class="row-desc">Sensitive fields show dots</p>
               </div>
               <button class="switch" role="switch" data-key="fields" aria-label="Form fields"></button>
             </div>
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Tab titles</span>
-                <p class="row-desc">“Inbox – you@gmail.com” becomes “Inbox – •••••” in the tab strip.</p>
+                <p class="row-desc">Details removed from tab names</p>
               </div>
               <button class="switch" role="switch" data-key="titles" aria-label="Tab titles"></button>
             </div>
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Notifications</span>
-                <p class="row-desc">Pop-ups from open sites show the site name instead of the message.</p>
+                <p class="row-desc">Pop-ups show the site, not the message</p>
               </div>
               <button class="switch" role="switch" data-key="notifications" aria-label="Notifications"></button>
             </div>
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Count on toolbar button</span>
-                <p class="row-desc">How many details are covered on the current page.</p>
+                <p class="row-desc">Covered details on the page</p>
               </div>
               <button class="switch" role="switch" data-key="badge" aria-label="Count on toolbar button"></button>
             </div>
@@ -146,12 +143,12 @@
           <h2>Sites</h2>
           <div class="field">
             <label class="field-title" for="curtainInput">Cover completely</label>
-            <p class="row-desc">The whole page is replaced while protection is on. Good for password managers and banking.</p>
+            <p class="row-desc">Replaces the whole page. For password managers and banks.</p>
             <div class="tags" id="curtainTags"><input id="curtainInput" placeholder="bank.example.com" autocomplete="off" spellcheck="false" /></div>
           </div>
           <div class="field">
             <label class="field-title" for="allowInput">Never hide on</label>
-            <p class="row-desc">Subdomains are included.</p>
+            <p class="row-desc">Subdomains included</p>
             <div class="tags" id="allowTags"><input id="allowInput" placeholder="example.com" autocomplete="off" spellcheck="false" /></div>
           </div>
         </section>
@@ -199,20 +196,14 @@ DATABASE_URL=postgres://admin:s3cr3tPass@203.0.113.42/app</pre>
 
         <section id="privacy" class="prose">
           <h2>Privacy</h2>
-          <p>
-            Nothing leaves your computer. There are no servers, accounts or analytics, and no network code; the extension's own pages are also
-            blocked from the network by its security policy. Settings, including your words, stay on this device and are never synced.
-          </p>
-          <p>
-            Chrome describes the site access as “read and change all your data”. Cloak Desk needs it to find sensitive text on whatever page you
-            show. It reads text only to cover it, never stores or sends it, and never changes the page itself: covers are painted on top.
-          </p>
+          <p>Nothing leaves your computer. No servers, accounts, analytics or network code. Settings stay on this device.</p>
+          <p>Chrome calls the site access “read and change all your data”. Cloak Desk reads page text only to cover it, and never stores or changes it.</p>
           <h3>What it can't cover</h3>
           <ul>
-            <li>Chrome's own interface: the address bar, autofill suggestions, bookmarks, <code>chrome://</code> pages and the Web Store.</li>
-            <li>Text inside images, video, PDFs and canvas-drawn apps such as Google Docs and Figma.</li>
-            <li>Matches highlighted by Find (Ctrl+F).</li>
-            <li>Other apps on your desktop. <a href="https://github.com/raktim-yoddha/cloak-desk#readme" target="_blank" rel="noopener">Cloak Desk for Windows</a> covers those.</li>
+            <li>Chrome's own interface, <code>chrome://</code> pages and the Web Store</li>
+            <li>Text in images, video, PDFs and canvas apps like Google Docs</li>
+            <li>Matches highlighted by Find (Ctrl+F)</li>
+            <li>Other desktop apps. <a href="https://github.com/raktim-yoddha/cloak-desk#readme" target="_blank" rel="noopener">Cloak Desk for Windows</a> covers those.</li>
           </ul>
         </section>
 
@@ -222,14 +213,14 @@ DATABASE_URL=postgres://admin:s3cr3tPass@203.0.113.42/app</pre>
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Export settings</span>
-                <p class="row-desc">A JSON file with your words and sites. Keep it private.</p>
+                <p class="row-desc">Your words and sites, as JSON</p>
               </div>
               <button class="btn" id="exportBtn">Export</button>
             </div>
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Import settings</span>
-                <p class="row-desc">Replaces everything except whether protection is on.</p>
+                <p class="row-desc">Replaces your settings</p>
               </div>
               <button class="btn" id="importBtn">Import</button>
               <input type="file" id="importFile" accept="application/json,.json" hidden />
@@ -237,7 +228,7 @@ DATABASE_URL=postgres://admin:s3cr3tPass@203.0.113.42/app</pre>
             <div class="row">
               <div class="row-text">
                 <span class="row-title">Reset</span>
-                <p class="row-desc">Restores the defaults and clears your words and sites.</p>
+                <p class="row-desc">Back to defaults</p>
               </div>
               <button class="btn btn-danger" id="resetBtn">Reset</button>
             </div>

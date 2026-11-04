@@ -192,10 +192,10 @@
 
     $('master').setAttribute('aria-checked', String(settings.enabled));
     $('masterDesc').textContent = {
-      off: 'Off. Nothing is covered.',
-      on: 'On. Sensitive details are covered on every page.',
-      live: 'On. A screen share is running and details are covered.',
-      armed: 'Ready. Covering starts when this browser shares your screen.',
+      off: 'Off',
+      on: 'On · every page',
+      live: 'On · screen share running',
+      armed: 'Starts when you share',
     }[state];
     $('navDot').className = 'dot' + (state === 'off' ? '' : ' ' + state);
     $('navStatus').textContent = { off: 'Protection off', on: 'Protection on', live: 'Sharing, covered', armed: 'Waiting for a share' }[state];

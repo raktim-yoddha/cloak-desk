@@ -17,9 +17,9 @@ First release: Cloak Desk for Windows and the Cloak Desk Browser Safety extensio
 - Hide chosen apps from screen shares: Cloak Desk mirrors your screen into a **Cloak Desk Stage** window with a curtain over every window of those apps. Share the Stage in Teams, Zoom, Meet, Discord or OBS; you keep seeing everything.
 - `Ctrl+Alt+C` turns the cloak on or off; `Ctrl+Alt+H` hides or shows the app in front of you.
 - Presets: named sets of hidden apps, each with a curtain color or image and an optional desktop curtain (wallpaper, icons, taskbar). Saved automatically to `%LOCALAPPDATA%\CloakDesk\presets.json`.
-- Notification-area icon and menu: open, cloak, switch preset, exit. Optional start with Windows (in the tray). Single instance.
+- Tray first: left-click the icon for a compact panel (cloak, preset, hide desktop, start with Windows, open, exit); right-click for a quick menu. Optional start with Windows. Single instance.
 - Cloak Desk's own windows never appear in any screen capture.
-- Windows 11 Settings-style interface (WinUI 3): gray-tinted Mica window with acrylic panels, light and dark theme. Version shown in Settings > About.
+- Dark interface (WinUI 3): gray-tinted Mica window with acrylic panels, dark even when Windows is in light mode. Version shown in Settings > About.
 - Setup for x64 and ARM64 (`CloakDesk-Setup-0.1.0-<arch>.exe`): per-user install, no admin prompt, nothing else to install. Portable zips and SHA256 checksums.
 
 #### Cloak Desk Browser Safety (Chrome, Edge, Brave)

@@ -82,6 +82,21 @@ static unsafe partial class Native
     // shell32 / dwmapi / kernel32 / d3d11 / combase
     [LibraryImport("shell32.dll")] public static partial int Shell_NotifyIconW(uint msg, NOTIFYICONDATAW* data);
     [LibraryImport("dwmapi.dll")] public static partial int DwmGetWindowAttribute(nint h, uint attr, void* value, int size);
+    [LibraryImport("dwmapi.dll")] public static partial int DwmSetWindowAttribute(nint h, uint attr, void* value, int size);
+
+    /// Dark window frame whatever the Windows light/dark setting: dark caption buttons, a #3A3A3A border and,
+    /// when given, a caption color (COLORREF 0x00BBGGRR). Ignored where unsupported (Windows 10).
+    public static void DarkFrame(nint hwnd, uint? caption = null)
+    {
+        int on = 1;
+        DwmSetWindowAttribute(hwnd, 20 /* DWMWA_USE_IMMERSIVE_DARK_MODE */, &on, 4);
+        uint border = 0x003A3A3A;
+        DwmSetWindowAttribute(hwnd, 34 /* DWMWA_BORDER_COLOR */, &border, 4);
+        if (caption is not uint cap) return;
+        uint text = 0x00FFFFFF;
+        DwmSetWindowAttribute(hwnd, 35 /* DWMWA_CAPTION_COLOR */, &cap, 4);
+        DwmSetWindowAttribute(hwnd, 36 /* DWMWA_TEXT_COLOR */, &text, 4);
+    }
     [LibraryImport("kernel32.dll")] public static partial nint OpenProcess(uint access, int inherit, uint pid);
     [LibraryImport("kernel32.dll")] public static partial int CloseHandle(nint h);
     [LibraryImport("kernel32.dll")] public static partial int QueryFullProcessImageNameW(nint proc, uint flags, char* buf, ref int size);
@@ -118,6 +133,14 @@ static unsafe partial class Native
             return Path.GetFileNameWithoutExtension(new string(buf, 0, size)).ToLowerInvariant();
         }
         finally { CloseHandle(p); }
+    }
+
+    /// Work area (screen minus taskbar) of the monitor that contains p.
+    public static RECT WorkAreaAt(POINT p)
+    {
+        var mi = new MONITORINFO { cbSize = sizeof(MONITORINFO) };
+        GetMonitorInfoW(MonitorFromPoint(p, 2 /* MONITOR_DEFAULTTONEAREST */), ref mi);
+        return mi.rcWork;
     }
 
     public static MONITORINFO PrimaryMonitor(out nint hmon)

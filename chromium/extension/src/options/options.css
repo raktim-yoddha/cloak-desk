@@ -47,14 +47,14 @@ body {
 
 .side nav {
   display: grid;
-  gap: 2px;
+  gap: 4px;
 }
 
 .side nav a {
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 32px;
+  gap: 11px;
+  height: 34px;
   padding: 0 10px;
   border-radius: var(--r-sm);
   color: var(--fg-2);
@@ -103,12 +103,12 @@ body {
 
 .main {
   width: 100%;
-  max-width: 760px;
-  padding: 56px 56px 140px;
+  max-width: 720px;
+  padding: 72px 64px 160px;
 }
 
 section {
-  margin-bottom: 60px;
+  margin-bottom: 96px;
 }
 
 h1 {
@@ -121,7 +121,7 @@ h1 {
 }
 
 h2 {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.025em;
@@ -130,11 +130,11 @@ h2 {
 h2 + .list,
 h2 + .tags,
 h2 + .field {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 h3 {
-  margin: 30px 0 10px;
+  margin: 40px 0 12px;
   font-size: 13px;
   font-weight: 500;
   color: var(--fg-2);
@@ -142,12 +142,12 @@ h3 {
 
 .lead {
   max-width: 62ch;
-  margin: 0 0 18px;
+  margin: 0 0 22px;
   color: var(--fg-2);
 }
 
 .hint {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   color: var(--fg-3);
   font-size: 12px;
 }
@@ -163,9 +163,9 @@ h3 {
 .row {
   display: flex;
   align-items: center;
-  gap: 18px;
-  min-height: 62px;
-  padding: 14px 18px;
+  gap: 24px;
+  min-height: 68px;
+  padding: 18px 22px;
 }
 
 .row + .row {
@@ -175,7 +175,7 @@ h3 {
 .row-text {
   display: grid;
   flex: 1;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -247,7 +247,7 @@ h3 {
 /* ---------- fields ---------- */
 
 .field + .field {
-  margin-top: 26px;
+  margin-top: 36px;
 }
 
 .field-title {
@@ -256,11 +256,11 @@ h3 {
 }
 
 .field .row-desc {
-  margin: 3px 0 10px;
+  margin: 4px 0 12px;
 }
 
 .disclosure {
-  margin-top: 22px;
+  margin-top: 28px;
 }
 
 .disclosure summary {
@@ -358,7 +358,7 @@ h3 {
 }
 
 .preview {
-  margin-top: 16px;
+  margin-top: 20px;
   overflow: hidden;
 }
 
@@ -366,8 +366,8 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 52px;
-  padding: 0 10px 0 18px;
+  height: 56px;
+  padding: 0 12px 0 22px;
   border-bottom: 1px solid var(--line);
   color: var(--fg-2);
 }
@@ -378,8 +378,8 @@ h3 {
 
 .preview-body {
   display: grid;
-  gap: 20px;
-  padding: 22px 18px 24px;
+  gap: 24px;
+  padding: 26px 22px 28px;
   background: rgba(0, 0, 0, 0.25);
 }
 
@@ -453,7 +453,7 @@ h3 {
 }
 
 .prose p {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
 }
 
 .prose ul {
@@ -462,7 +462,7 @@ h3 {
 }
 
 .prose li + li {
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .prose li::marker {
@@ -489,10 +489,10 @@ code {
 .welcome {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 270px;
-  gap: 32px;
+  gap: 40px;
   align-items: center;
-  margin-bottom: 64px;
-  padding: 30px 30px 28px;
+  margin-bottom: 104px;
+  padding: 40px 36px 36px;
 }
 
 .welcome p {
@@ -504,8 +504,8 @@ code {
 
 .welcome .actions {
   display: flex;
-  gap: 8px;
-  margin: 24px 0 14px;
+  gap: 10px;
+  margin: 28px 0 16px;
 }
 
 .welcome .btn {

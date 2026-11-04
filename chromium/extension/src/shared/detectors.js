@@ -127,7 +127,7 @@
     {
       id: 'phone',
       label: 'Phone numbers',
-      hint: '+91 98765 43210, (415) 555-0132, international formats',
+      hint: 'Any country format',
       example: '+91 98765 43210',
       rules: [
         {
@@ -153,7 +153,7 @@
     {
       id: 'iban',
       label: 'Bank accounts (IBAN)',
-      hint: 'International bank account numbers',
+      hint: 'International bank accounts',
       example: 'GB82 WEST 1234 5698 7654 32',
       rules: [
         {
@@ -185,7 +185,7 @@
     {
       id: 'secrets',
       label: 'API keys, tokens & passwords',
-      hint: 'GitHub, AWS, Stripe, Google, OpenAI, Slack, JWTs, private keys, and password = … lines',
+      hint: 'GitHub, AWS, Stripe, OpenAI and more',
       example: 'ghp_8fK2xQ9mVt7Lr1ZsP0cWbN4yHd6Ue3Ja5Gk',
       rules: [
         {
@@ -219,7 +219,7 @@
     {
       id: 'ip',
       label: 'IP addresses',
-      hint: 'Home and server IPv4 or IPv6 addresses',
+      hint: 'IPv4 and IPv6',
       example: '203.0.113.42',
       rules: [
         {
@@ -237,7 +237,7 @@
     {
       id: 'crypto',
       label: 'Crypto wallets',
-      hint: 'Bitcoin and Ethereum addresses',
+      hint: 'Bitcoin and Ethereum',
       example: '0x52908400098527886E0F7030069857D2E4169EE7',
       rules: [
         { re: /\b0x[a-fA-F0-9]{40}\b/g },
