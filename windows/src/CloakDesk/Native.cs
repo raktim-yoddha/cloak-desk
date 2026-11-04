@@ -82,21 +82,6 @@ static unsafe partial class Native
     // shell32 / dwmapi / kernel32 / d3d11 / combase
     [LibraryImport("shell32.dll")] public static partial int Shell_NotifyIconW(uint msg, NOTIFYICONDATAW* data);
     [LibraryImport("dwmapi.dll")] public static partial int DwmGetWindowAttribute(nint h, uint attr, void* value, int size);
-    [LibraryImport("dwmapi.dll")] public static partial int DwmSetWindowAttribute(nint h, uint attr, void* value, int size);
-
-    /// Dark window frame regardless of the Windows light/dark setting: dark caption buttons and title bar,
-    /// a #1D1D1D hairline border, and (optionally) a #0A0A0A caption. Ignored where unsupported (Windows 10).
-    public static void DarkFrame(nint hwnd, bool caption)
-    {
-        int on = 1;
-        DwmSetWindowAttribute(hwnd, 20 /* DWMWA_USE_IMMERSIVE_DARK_MODE */, &on, 4);
-        uint border = 0x001D1D1D; // COLORREF is 0x00BBGGRR
-        DwmSetWindowAttribute(hwnd, 34 /* DWMWA_BORDER_COLOR */, &border, 4);
-        if (!caption) return;
-        uint cap = 0x000A0A0A, text = 0x00EDEDED;
-        DwmSetWindowAttribute(hwnd, 35 /* DWMWA_CAPTION_COLOR */, &cap, 4);
-        DwmSetWindowAttribute(hwnd, 36 /* DWMWA_TEXT_COLOR */, &text, 4);
-    }
     [LibraryImport("kernel32.dll")] public static partial nint OpenProcess(uint access, int inherit, uint pid);
     [LibraryImport("kernel32.dll")] public static partial int CloseHandle(nint h);
     [LibraryImport("kernel32.dll")] public static partial int QueryFullProcessImageNameW(nint proc, uint flags, char* buf, ref int size);

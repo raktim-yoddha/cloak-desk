@@ -19,7 +19,7 @@ First release: Cloak Desk for Windows and the Cloak Desk Browser Safety extensio
 - Presets: named sets of hidden apps, each with a curtain color or image and an optional desktop curtain (wallpaper, icons, taskbar). Saved automatically to `%LOCALAPPDATA%\CloakDesk\presets.json`.
 - Notification-area icon and menu: open, cloak, switch preset, exit. Optional start with Windows (in the tray). Single instance.
 - Cloak Desk's own windows never appear in any screen capture.
-- Dark interface with silver accents (WinUI 3), also when Windows is in light mode. Black-and-silver app and tray icons: curtain open when off, closed while cloaking. Version shown in Settings > About.
+- Windows 11 Settings-style interface (WinUI 3): gray-tinted Mica window with acrylic panels, light and dark theme. Version shown in Settings > About.
 - Setup for x64 and ARM64 (`CloakDesk-Setup-0.1.0-<arch>.exe`): per-user install, no admin prompt, nothing else to install. Portable zips and SHA256 checksums.
 
 #### Cloak Desk Browser Safety (Chrome, Edge, Brave)
