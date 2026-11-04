@@ -20,6 +20,9 @@
 #endif
 ; Windows App Runtime the app is built against (Microsoft.WindowsAppSDK 1.8) and Microsoft's installer for it.
 #define RuntimePackage "Microsoft.WindowsAppRuntime.1.8"
+; Lowest runtime the app accepts: the framework package version of Microsoft.WindowsAppSDK.Runtime 1.8.260804001
+; (CloakDesk.csproj). Older 1.8 runtimes get updated. CI checks this matches the NuGet package.
+#define RuntimeMinVersion "8000.946.1701.0"
 #define RuntimeUrl "https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-" + LowerCase(Arch) + ".exe"
 ; Numeric part only (1.2.3 of 1.2.3-beta.1) for the Windows file version.
 #define NumericVersion Copy(AppVersion, 1, Pos("-", AppVersion + "-") - 1)
@@ -86,13 +89,13 @@ Filename: "{app}\CloakDesk.exe"; Description: "{cm:LaunchProgram,Cloak Desk}"; F
 Filename: "{sys}\taskkill.exe"; Parameters: "/F /IM CloakDesk.exe"; Flags: runhidden; RunOnceId: "StopCloakDesk"
 
 [Code]
-// True if this user already has Microsoft's Windows App Runtime 1.8 for this architecture.
+// True if this user already has Microsoft's Windows App Runtime 1.8, new enough, for this architecture.
 function RuntimeInstalled: Boolean;
 var
   Code: Integer;
 begin
   Result := Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
-    '-NoProfile -NonInteractive -Command "if (Get-AppxPackage -Name ''{#RuntimePackage}'' | Where-Object { $_.Architecture -eq ''{#RuntimeArch}'' }) { exit 0 } else { exit 1 }"',
+    '-NoProfile -NonInteractive -Command "if (Get-AppxPackage -Name ''{#RuntimePackage}'' | Where-Object { $_.Architecture -eq ''{#RuntimeArch}'' -and [version]$_.Version -ge [version]''{#RuntimeMinVersion}'' }) { exit 0 } else { exit 1 }"',
     '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0);
 end;
 

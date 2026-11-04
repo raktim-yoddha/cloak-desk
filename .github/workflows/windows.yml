@@ -78,8 +78,18 @@ jobs:
           & $iscc /Qp "/DAppVersion=$v" /DArch=x64 "/DSourceDir=$PWD\out-x64" windows\installer\CloakDesk.iss
           if ($LASTEXITCODE) { throw "ISCC failed" }
           $setup = Get-Item "windows\installer\output\CloakDesk-Setup-$v-x64.exe"
-          $before = [bool](Get-AppxPackage -Name Microsoft.WindowsAppRuntime.1.8 | Where-Object { $_.Architecture -eq 'X64' })
-          Write-Host "Windows App Runtime 1.8 present before setup: $before (setup downloads and installs it when missing)"
+          # Get-AppxPackage needs Windows PowerShell (not pwsh 7). The minimum comes from the setup script.
+          $min = [regex]::Match((Get-Content windows\installer\CloakDesk.iss -Raw), '#define RuntimeMinVersion "([^"]+)"').Groups[1].Value
+          function RuntimeOk { (powershell.exe -NoProfile -Command "[bool](Get-AppxPackage -Name Microsoft.WindowsAppRuntime.1.8 | Where-Object { `$_.Architecture -eq 'X64' -and [version]`$_.Version -ge [version]'$min' })") -eq 'True' }
+          # The minimum must match the Microsoft.WindowsAppSDK.Runtime package the app is built with.
+          $info = Get-ChildItem "$env:USERPROFILE\.nuget\packages\microsoft.windowsappsdk.runtime" -Recurse -Filter 'WindowsAppSDK-VersionInfo.*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($info) {
+            $pkg = [regex]::Matches((Get-Content $info.FullName -Raw), '8000\.\d+\.\d+\.\d+') | ForEach-Object Value | Select-Object -Unique
+            Write-Host "Runtime version in $($info.Name): $($pkg -join ', '); setup minimum: $min"
+            if ($pkg -and $pkg -notcontains $min) { throw "RuntimeMinVersion $min in CloakDesk.iss doesn't match the Microsoft.WindowsAppSDK.Runtime package ($($pkg -join ', '))" }
+          }
+          powershell.exe -NoProfile -Command "Get-AppxPackage -Name Microsoft.WindowsAppRuntime.1.8 | Format-Table Name, Version, Architecture -AutoSize | Out-String" | Write-Host
+          Write-Host "Windows App Runtime 1.8 >= $min present before setup: $(RuntimeOk) (setup installs or updates it when not)"
           Write-Host ("setup: {0} ({1:N1} MB), file version {2}" -f $setup.Name, ($setup.Length / 1MB), $setup.VersionInfo.ProductVersion)
           $dir = "$env:LOCALAPPDATA\Programs\Cloak Desk"
           Start-Process $setup.FullName -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=startup' -Wait
@@ -93,7 +103,7 @@ jobs:
           Start-Sleep -Seconds 3
           if (Test-Path "$dir\CloakDesk.exe") { throw "uninstall left the app behind" }
           if ((Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -ErrorAction SilentlyContinue).CloakDesk) { throw "uninstall left the Run key" }
-          if (-not (Get-AppxPackage -Name Microsoft.WindowsAppRuntime.1.8 | Where-Object { $_.Architecture -eq 'X64' })) { throw "Windows App Runtime 1.8 not installed after setup" }
+          if (-not (RuntimeOk)) { throw "Windows App Runtime 1.8 >= $min not installed after setup" }
           Write-Host "installer: install, launch and uninstall OK (the runtime stays: it's shared)"
 
       - name: Smoke test (Debug)
