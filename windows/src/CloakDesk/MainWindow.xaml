@@ -45,7 +45,7 @@
                             </local:SettingsRow>
                             <local:SettingsRow Glyph="&#xE790;" Header="Curtain color" Description="What viewers see over hidden apps">
                                 <Button Padding="4" AutomationProperties.Name="Curtain color">
-                                    <Border x:Name="ColorSwatch" Width="48" Height="24" CornerRadius="2" />
+                                    <Border x:Name="ColorSwatch" Width="48" Height="24" CornerRadius="4" BorderBrush="#3D3D3D" BorderThickness="1" />
                                     <Button.Flyout>
                                         <Flyout>
                                             <ColorPicker x:Name="Picker" ColorChanged="OnColorChanged" IsAlphaEnabled="False" IsMoreButtonVisible="False" />

@@ -106,6 +106,7 @@ sealed unsafe partial class Stage : IDisposable
             var work = mi.rcWork;
             _hwnd = Native.CreateWindow("CloakDeskStage", "Cloak Desk Stage", Native.WS_OVERLAPPEDWINDOW, 0,
                 work.Left + 48, work.Top + 48, (work.Right - work.Left) / 2, (work.Bottom - work.Top) / 2, OnMessage);
+            Native.DarkFrame(_hwnd, caption: true); // near-black title bar like the main window
 
             using var adapter = dxgiDevice.GetAdapter();
             using var factory = adapter.GetParent<IDXGIFactory2>();

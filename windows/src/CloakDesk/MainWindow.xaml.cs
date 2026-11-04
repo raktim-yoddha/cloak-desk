@@ -31,6 +31,18 @@ public sealed partial class MainWindow : Window
         AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
 
         var hwnd = Win32Interop.GetWindowFromWindowId(AppWindow.Id);
+        // The app is always dark; with Windows in light mode the frame and caption buttons would
+        // otherwise be drawn for light mode (dark glyphs on the near-black title bar).
+        Native.DarkFrame(hwnd, caption: false);
+        var bar = AppWindow.TitleBar;
+        bar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+        bar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+        bar.ButtonForegroundColor = Color.FromArgb(255, 0xED, 0xED, 0xED);
+        bar.ButtonInactiveForegroundColor = Color.FromArgb(255, 0x87, 0x87, 0x87);
+        bar.ButtonHoverForegroundColor = Microsoft.UI.Colors.White;
+        bar.ButtonHoverBackgroundColor = Color.FromArgb(255, 0x1F, 0x1F, 0x1F);
+        bar.ButtonPressedForegroundColor = Microsoft.UI.Colors.White;
+        bar.ButtonPressedBackgroundColor = Color.FromArgb(255, 0x2A, 0x2A, 0x2A);
         // You see this window, viewers never do. CLOAKDESK_CAPTURABLE=1 turns that off for screenshots of the app itself.
         if (Environment.GetEnvironmentVariable("CLOAKDESK_CAPTURABLE") != "1")
             Native.SetWindowDisplayAffinity(hwnd, Native.WDA_EXCLUDEFROMCAPTURE);
