@@ -31,13 +31,21 @@
     desc.className = 'row-desc';
     desc.textContent = det.hint;
     text.append(title, desc);
+    // each row previews its own cover on an example value
+    const sample = document.createElement('span');
+    sample.className = 'sample';
+    sample.dataset.sample = det.id;
+    sample.textContent = det.example;
+    const cover = document.createElement('i');
+    cover.className = 'cover';
+    sample.append(cover);
     const sw = document.createElement('button');
     sw.className = 'switch';
     sw.setAttribute('role', 'switch');
     sw.setAttribute('aria-label', det.label);
     sw.dataset.detector = det.id;
     sw.addEventListener('click', () => store.update((s) => ({ detectors: Object.assign({}, s.detectors, { [det.id]: !s.detectors[det.id] }) })));
-    row.append(text, sw);
+    row.append(text, sample, sw);
     detectorList.append(row);
   }
 
@@ -169,6 +177,7 @@
     b.addEventListener('click', () => {
       previewMode = b.dataset.pv;
       for (const x of document.querySelectorAll('[data-pv]')) x.setAttribute('aria-checked', String(x === b));
+      b.parentElement.style.setProperty('--i', previewMode === 'viewer' ? 0 : 1);
       runPreview();
     });
   }
@@ -193,6 +202,13 @@
 
     for (const b of $('mode').querySelectorAll('[data-mode]')) b.setAttribute('aria-checked', String(b.dataset.mode === settings.mode));
     for (const b of detectorList.querySelectorAll('[data-detector]')) b.setAttribute('aria-checked', String(!!settings.detectors[b.dataset.detector]));
+    for (const x of detectorList.querySelectorAll('[data-sample]')) x.classList.toggle('covered', !!settings.detectors[x.dataset.sample]);
+
+    // every sample on the page uses the chosen cover style and color
+    document.documentElement.dataset.cover = settings.style;
+    document.documentElement.style.setProperty('--cover', settings.color);
+    $('welcomeViewer').classList.toggle('covered', settings.enabled);
+    $('sideSwitch').setAttribute('aria-checked', String(settings.enabled));
     for (const b of document.querySelectorAll('[data-key]')) b.setAttribute('aria-checked', String(!!settings[b.dataset.key]));
 
     words.draw(settings.customWords);
@@ -200,7 +216,9 @@
     curtainTags.draw(settings.curtainSites);
     allowTags.draw(settings.allowSites);
 
-    for (const b of $('styles').querySelectorAll('[data-style]')) b.setAttribute('aria-checked', String(b.dataset.style === settings.style));
+    const styleButtons = [...$('styles').querySelectorAll('[data-style]')];
+    for (const b of styleButtons) b.setAttribute('aria-checked', String(b.dataset.style === settings.style));
+    $('styles').style.setProperty('--i', Math.max(0, styleButtons.findIndex((b) => b.dataset.style === settings.style)));
     let known = false;
     for (const b of swatches.querySelectorAll('[data-color]')) {
       const sel = b.dataset.color === settings.color;
@@ -225,6 +243,7 @@
   // ---------- actions ----------
 
   $('master').addEventListener('click', () => store.update((s) => ({ enabled: !s.enabled, onboarded: true })));
+  $('sideSwitch').addEventListener('click', () => store.update((s) => ({ enabled: !s.enabled, onboarded: true })));
   $('welcomeEnable').addEventListener('click', async () => {
     await store.update({ enabled: true, onboarded: true });
     toast('Protection is on');

@@ -13,30 +13,42 @@
       <aside class="side">
         <div class="brand"><img src="../../icons/app-32.png" alt="" width="20" height="20" />Cloak Desk</div>
         <nav aria-label="Sections">
-          <a href="#general">General</a>
-          <a href="#detection">Detection</a>
-          <a href="#words">Your words</a>
-          <a href="#more">More places</a>
-          <a href="#sites">Sites</a>
-          <a href="#appearance">Appearance</a>
-          <a href="#privacy">Privacy</a>
-          <a href="#data">Data</a>
+          <a href="#general"><span data-icon="sliders"></span>General</a>
+          <a href="#detection"><span data-icon="eye-off"></span>Detection</a>
+          <a href="#words"><span data-icon="text"></span>Your words</a>
+          <a href="#more"><span data-icon="field"></span>More places</a>
+          <a href="#sites"><span data-icon="globe"></span>Sites</a>
+          <a href="#appearance"><span data-icon="palette"></span>Appearance</a>
+          <a href="#privacy"><span data-icon="lock"></span>Privacy</a>
+          <a href="#data"><span data-icon="download"></span>Data</a>
         </nav>
-        <p class="side-status"><span class="dot" id="navDot"></span><span id="navStatus">Off</span></p>
+        <div class="side-status">
+          <span class="dot" id="navDot"></span><span id="navStatus">Off</span>
+          <button class="switch" role="switch" id="sideSwitch" aria-checked="false" aria-label="Protection"></button>
+        </div>
       </aside>
 
       <main class="main">
-        <section class="welcome" id="welcome" hidden>
-          <h1>Hide what viewers shouldn't see</h1>
-          <p>
-            Cloak Desk covers emails, phone numbers, card numbers, IDs and API keys on every web page while you stream or share your screen.
-            The covers show on your screen too, so you always see exactly what your viewers see.
-          </p>
-          <div class="actions">
-            <button class="btn btn-primary" id="welcomeEnable">Turn on protection</button>
-            <a class="btn btn-quiet" href="#appearance">See an example</a>
+        <section class="welcome panel" id="welcome" hidden>
+          <div class="welcome-text">
+            <h1>Hide what viewers shouldn't see</h1>
+            <p>
+              Cloak Desk covers emails, phone numbers, card numbers, IDs and API keys on every web page while you stream or share your screen.
+              The covers show on your screen too, so you always see exactly what your viewers see.
+            </p>
+            <div class="actions">
+              <button class="btn btn-primary" id="welcomeEnable">Turn on protection</button>
+              <a class="btn btn-quiet" href="#appearance">See an example</a>
+            </div>
+            <p class="hint">Pin it from the puzzle icon in Chrome's toolbar to reach it in one click.</p>
           </div>
-          <p class="hint">Pin it from the puzzle icon in Chrome's toolbar to reach it in one click.</p>
+          <div class="well welcome-viewer" id="welcomeViewer" aria-label="Preview of what viewers see">
+            <span class="viewer-label">Viewers see</span>
+            <span class="sample">raktim.yoddha@gmail.com<i class="cover"></i></span>
+            <span class="sample">+91 98765 43210<i class="cover"></i></span>
+            <span class="sample">4111 1111 1111 1111<i class="cover"></i></span>
+            <span class="sample">ghp_8fK2xQ9mVt7Lr1ZsP0<i class="cover"></i></span>
+          </div>
         </section>
 
         <section id="general">
@@ -149,7 +161,7 @@
           <div class="list">
             <div class="row">
               <span class="row-title">Style</span>
-              <div class="seg" role="radiogroup" aria-label="Style" id="styles">
+              <div class="seg seg-3" role="radiogroup" aria-label="Style" id="styles">
                 <button role="radio" data-style="redact">Solid</button>
                 <button role="radio" data-style="blur">Frosted</button>
                 <button role="radio" data-style="tint">Tint</button>
@@ -161,7 +173,7 @@
             </div>
           </div>
 
-          <div class="preview" id="preview">
+          <div class="preview panel" id="preview">
             <div class="preview-bar">
               <span>Preview</span>
               <div class="seg" role="radiogroup" aria-label="Preview">

@@ -27,7 +27,7 @@ First release: Cloak Desk for Windows and the Cloak Desk Browser Safety extensio
 - Off after install; turn it on from the toolbar, the welcome page or `Alt+Shift+H`. Mode **Always** (for OBS and desktop apps) or **only while this browser shares the screen**, detected automatically.
 - Also hides what's typed in sensitive form fields, cleans tab titles, hides notification previews, and can cover whole sites (password managers by default).
 - Pages are never modified (covers are painted with the CSS Custom Highlight API); iframes and shadow DOM are covered; new pages stay hidden until scanned; covers survive pages clearing highlights or stylesheets.
-- Dark, silver-accented interface set in Geist (bundled); silver covers by default. Covers also show on your own screen, so you see exactly what viewers see.
+- Black-and-graphite interface set in Geist (bundled): layered panels, a live "Viewers see" preview in the toolbar panel, and an example cover on every detection setting. Silver covers by default. Covers also show on your own screen, so you see exactly what viewers see.
 - No network code, strict Content Security Policy, settings kept on the device. `CloakDesk-Browser-0.1.0.zip`: unzip and use **Load unpacked** in `chrome://extensions`.
 
 ### Known limitations

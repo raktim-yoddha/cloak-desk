@@ -271,12 +271,12 @@ const server = http.createServer((req, res) => {
       const p = await ctx.newPage();
       watchErrors(p);
       await p.emulateMedia({ colorScheme: scheme });
-      await p.setViewportSize({ width: 320, height: 640 });
+      await p.setViewportSize({ width: 340, height: 640 });
       const tabId = await sw.evaluate(async (u) => (await chrome.tabs.query({ url: u + '*' }))[0].id, url);
       await p.goto(`chrome-extension://${extId}/src/popup/popup.html?tab=${tabId}`);
       await p.waitForTimeout(400);
       const h = await p.evaluate(() => document.body.scrollHeight);
-      await p.setViewportSize({ width: 320, height: h });
+      await p.setViewportSize({ width: 340, height: h });
       await p.screenshot({ path: path.join(OUT, `06-popup-${scheme}.png`) });
       await p.close();
     }
@@ -303,12 +303,12 @@ const server = http.createServer((req, res) => {
   async function openPopup(tabId, name) {
     const p = await ctx.newPage();
     watchErrors(p);
-    await p.setViewportSize({ width: 320, height: 600 });
+    await p.setViewportSize({ width: 340, height: 600 });
     await p.goto(`chrome-extension://${extId}/src/popup/popup.html?tab=${tabId}`);
     await p.waitForTimeout(350);
     if (name) {
       const h = await p.evaluate(() => document.body.scrollHeight);
-      await p.setViewportSize({ width: 320, height: h });
+      await p.setViewportSize({ width: 340, height: h });
       await p.screenshot({ path: path.join(OUT, `${name}.png`) });
     }
     return p;
@@ -318,24 +318,27 @@ const server = http.createServer((req, res) => {
     await setSettings({ enabled: false, mode: 'always', allowSites: [], curtainSites: [] });
     let p = await openPopup(demoTab, '10-popup-off');
     assert.equal(await p.textContent('#statusText'), 'Off');
+    assert.equal(await p.evaluate(() => document.getElementById('viewer').classList.contains('covered')), false);
     await p.close();
 
     await setSettings({ enabled: true });
     await waitFor(async () => (await masked()).active, 'on');
     p = await openPopup(demoTab, '11-popup-on');
-    assert.match(await p.textContent('#statusText'), /Hiding sensitive details · \d+ on this page/);
+    assert.equal(await p.textContent('#heroTitle'), 'Protected');
+    assert.match(await p.textContent('#statusText'), /^\d+ covered on this page$/);
+    assert.equal(await p.evaluate(() => document.getElementById('viewer').classList.contains('covered')), true);
     await p.close();
 
     await setSettings({ mode: 'sharing' });
     p = await openPopup(demoTab, '12-popup-waiting-for-share');
-    assert.equal(await p.textContent('#statusText'), 'Waiting for a screen share');
+    assert.equal(await p.textContent('#heroTitle'), 'Ready');
     await p.close();
 
     await page.bringToFront();
     await page.click('#share');
     await waitFor(async () => (await masked()).active, 'live');
     p = await openPopup(demoTab, '13-popup-live-share');
-    assert.match(await p.textContent('#statusText'), /^Live share/);
+    assert.equal(await p.textContent('#heroTitle'), 'Live share');
     assert.equal(await p.isVisible('#resetShare'), true);
     await p.click('#resetShare');
     await waitFor(async () => (await sw.evaluate(() => chrome.storage.local.get('runtime'))).runtime.sharing === 0, '"Not sharing?" clears the share');
@@ -344,7 +347,7 @@ const server = http.createServer((req, res) => {
 
     await setSettings({ mode: 'always', allowSites: ['localhost'] });
     p = await openPopup(demoTab, '14-popup-paused-on-site');
-    assert.equal(await p.textContent('#statusText'), 'Paused on localhost');
+    assert.equal(await p.textContent('#statusText'), 'Never hidden on localhost');
     await p.close();
     await setSettings({ allowSites: [] });
 

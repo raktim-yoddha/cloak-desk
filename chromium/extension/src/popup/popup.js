@@ -52,36 +52,48 @@
     $('master').setAttribute('aria-checked', String(settings.enabled));
 
     const dot = $('dot');
+    const title = $('heroTitle');
     const text = $('statusText');
     dot.className = 'dot';
     if (!settings.enabled) {
+      title.textContent = 'Not protected';
       text.textContent = 'Off';
     } else if (sharing && active) {
       dot.classList.add('live');
-      text.textContent = 'Live share';
+      title.textContent = 'Live share';
+      text.textContent = 'Covering sensitive details';
     } else if (active) {
       dot.classList.add('on');
-      text.textContent = 'Hiding sensitive details';
+      title.textContent = 'Protected';
+      text.textContent = 'Covering sensitive details';
     } else if (allowed && (settings.mode === 'always' || sharing)) {
-      text.textContent = `Paused on ${site}`;
+      title.textContent = 'Paused';
+      text.textContent = `Never hidden on ${site}`;
     } else {
       dot.classList.add('armed');
-      text.textContent = 'Waiting for a screen share';
+      title.textContent = 'Ready';
+      text.textContent = 'Starts when you share your screen';
     }
     if (active && host) {
-      const base = text.textContent;
       const showCount = async () => {
         const n = await tabCount();
-        if (n != null) text.textContent = base + (n ? ` · ${n} on this page` : ' · nothing on this page');
+        if (n != null) text.textContent = n ? `${n} covered on this page` : 'Nothing to cover on this page';
       };
       await showCount();
       // a page that just turned on reports its count a moment later
       clearTimeout(countTimer);
       countTimer = setTimeout(showCount, 600);
     }
+
+    // "Viewers see": the sample lines get covered, in the chosen style and color, while hiding is on
+    const viewer = $('viewer');
+    viewer.dataset.cover = settings.style;
+    viewer.style.setProperty('--cover', settings.color);
+    viewer.classList.toggle('covered', active);
     $('resetShare').hidden = !sharing;
 
     for (const b of $('mode').querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset.mode === settings.mode));
+    $('mode').style.setProperty('--i', settings.mode === 'always' ? 0 : 1);
     $('modeNote').textContent =
       settings.mode === 'always'
         ? 'Use Always for OBS, Zoom or Discord apps. They share from outside the browser.'

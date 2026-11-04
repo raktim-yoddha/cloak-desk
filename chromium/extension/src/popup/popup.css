@@ -1,10 +1,9 @@
 body {
-  width: 320px;
-}
-
-section + section,
-.foot {
-  border-top: 1px solid var(--line);
+  width: 340px;
+  padding-bottom: 2px;
+  background:
+    radial-gradient(420px 220px at 50% -60px, rgba(255, 255, 255, 0.055), transparent 70%),
+    var(--bg);
 }
 
 /* ---------- header ---------- */
@@ -12,38 +11,47 @@ section + section,
 .top {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 8px 0 16px;
-  border-bottom: 1px solid var(--line);
+  gap: 10px;
+  height: 48px;
+  padding: 0 10px 0 16px;
 }
 
 .mark {
   border-radius: 5px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .name {
   flex: 1;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-/* ---------- protection ---------- */
+/* ---------- hero ---------- */
 
-.power {
-  padding: 18px 16px 16px;
+.hero {
+  margin: 0 10px;
+  padding: 16px 16px 14px;
 }
 
-.power-row {
+.hero-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
-.power-title {
-  font-size: 16px;
+.hero-text {
+  min-width: 0;
+}
+
+.hero-title {
+  display: block;
+  font-size: 19px;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
 .status {
@@ -52,24 +60,49 @@ section + section,
   gap: 8px;
   margin: 6px 0 0;
   color: var(--fg-2);
+  white-space: nowrap;
 }
 
 .status #statusText {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.status .link {
-  margin-left: auto;
-  white-space: nowrap;
+.viewer {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 12px 14px;
 }
 
-/* ---------- rows ---------- */
+.viewer-label {
+  flex: none;
+  width: 54px;
+  padding-top: 2px;
+  color: var(--fg-3);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
 
-.rows {
-  padding: 6px 0;
+.viewer-lines {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.reset {
+  display: block;
+  margin: 10px 0 0 auto;
+}
+
+/* ---------- grouped controls ---------- */
+
+.group {
+  margin: 10px 10px 0;
+  padding: 4px 0;
 }
 
 .row {
@@ -77,8 +110,35 @@ section + section,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 16px;
+}
+
+.group > .row + .row,
+.group > .row + #site,
+.group > #site + .row,
+.group > .row + .row-link,
+.group > #site + .row-link,
+.group > #noSite + .row-link,
+.group > .row + #noSite {
+  border-top: 1px solid var(--line);
+}
+
+#site .row + .row {
+  border-top: 1px solid var(--line);
+}
+
+.row-stack {
+  display: block;
+  padding-top: 10px;
+  padding-bottom: 12px;
+}
+
+.row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .row-label {
@@ -89,29 +149,32 @@ section + section,
 }
 
 .host {
-  font-family: var(--mono);
-  font-size: 12px;
+  font: 12px var(--mono);
   color: var(--fg-2);
 }
 
 .note {
-  margin: 0;
-  padding: 2px 16px 10px;
+  margin: 8px 0 0;
   color: var(--fg-3);
   font-size: 12px;
   line-height: 1.45;
 }
 
+.note.flush {
+  margin: 10px 0;
+}
+
 .row-link {
   width: 100%;
   border: 0;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
   background: transparent;
   text-align: left;
   transition: background var(--t);
 }
 
 .row-link:hover {
-  background: var(--raise);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .row-value {
@@ -123,6 +186,11 @@ section + section,
   width: 14px;
   height: 14px;
   color: var(--fg-3);
+  transition: transform var(--t);
+}
+
+.row-link:hover .chev {
+  transform: translateX(2px);
 }
 
 /* ---------- footer ---------- */
@@ -131,8 +199,8 @@ section + section,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 40px;
-  padding: 0 16px;
+  height: 46px;
+  padding: 0 18px;
   color: var(--fg-3);
   font-size: 12px;
 }
@@ -140,7 +208,7 @@ section + section,
 .foot #shortcut {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .link {
@@ -154,8 +222,4 @@ section + section,
 
 .link:hover {
   color: var(--fg);
-}
-
-.foot .link {
-  font-size: 12px;
 }
