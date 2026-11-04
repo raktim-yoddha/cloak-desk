@@ -93,12 +93,12 @@
 
     // ---------- styles ----------
 
+    /** r is a Document or ShadowRoot; ours go last so they win over page sheets of equal specificity. */
     function ensureStyles(r) {
-      const target = r.nodeType === 9 ? r : r;
       try {
-        const list = target.adoptedStyleSheets;
+        const list = r.adoptedStyleSheets;
         if (!list.includes(sheet) || !list.includes(guardSheet)) {
-          target.adoptedStyleSheets = [...list.filter((s) => s !== sheet && s !== guardSheet), sheet, guardSheet];
+          r.adoptedStyleSheets = [...list.filter((s) => s !== sheet && s !== guardSheet), sheet, guardSheet];
         }
       } catch (_) {
         /* document without adoptedStyleSheets support */
