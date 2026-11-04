@@ -45,6 +45,19 @@ jobs:
           $files = Get-ChildItem out-${{ matrix.arch }} -Recurse -File
           Write-Host ("---- version {0}, {1} files, publish size {2:N1} MB" -f $exe.VersionInfo.ProductVersion, $files.Count, ($size / 1MB))
           $files | Sort-Object Length -Descending | Select-Object -First 15 | ForEach-Object { "{0,8:N0} KB  {1}" -f ($_.Length / 1KB), $_.Name }
+          # Size breakdown, also kept in size.txt on the ci-artifacts branch
+          $root = (Resolve-Path out-${{ matrix.arch }}).Path
+          & {
+            "== by folder"
+            $files | Group-Object { $d = Split-Path $_.FullName.Substring($root.Length + 1) -Parent; if ($d) { $d.Split('\')[0] } else { '.' } } |
+              ForEach-Object { [pscustomobject]@{ Name = $_.Name; Count = $_.Count; KB = ($_.Group | Measure-Object Length -Sum).Sum / 1KB } } |
+              Sort-Object KB -Descending | ForEach-Object { "{0,10:N0} KB {1,4} files  {2}" -f $_.KB, $_.Count, $_.Name }
+            "== by extension"
+            $files | Group-Object Extension | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Count = $_.Count; KB = ($_.Group | Measure-Object Length -Sum).Sum / 1KB } } |
+              Sort-Object KB -Descending | ForEach-Object { "{0,10:N0} KB {1,4} files  {2}" -f $_.KB, $_.Count, $_.Name }
+            "== all files"
+            $files | Sort-Object Length -Descending | ForEach-Object { "{0,10:N0} KB  {1}" -f ($_.Length / 1KB), $_.FullName.Substring($root.Length + 1) }
+          } | Tee-Object size.txt | Select-Object -First 60
 
       - name: Build (Debug, JIT, console)
         if: matrix.arch == 'x64'
@@ -130,6 +143,7 @@ jobs:
           New-Item -ItemType Directory -Force $dst | Out-Null
           foreach ($d in 'smoke', 'e2e', 'tour') { if (Test-Path $d) { Copy-Item $d $dst -Recurse } }
           if (Test-Path publish.log) { Copy-Item publish.log $dst }
+          if (Test-Path size.txt) { Copy-Item size.txt $dst }
           Set-Location $dst
           git init -q; git checkout -q -b ci-artifacts; git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Run ${{ github.run_id }} on ${{ github.ref_name }} @ ${{ github.sha }}"
