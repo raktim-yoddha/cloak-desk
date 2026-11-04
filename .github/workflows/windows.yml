@@ -96,6 +96,18 @@ jobs:
           Write-Host '---- setup log (runtime part)'
           Get-Content setup.log | Select-String -Pattern 'Runtime|runtime|Download|download|PrepareToInstall|error|Error' | ForEach-Object { $_.Line }
           Write-Host "Windows App Runtime 1.8 >= $min present after setup: $(RuntimeOk)"
+          Write-Host '---- runtime packages after setup (all users)'
+          powershell.exe -NoProfile -Command "Get-AppxPackage -AllUsers *WindowsAppRuntime* | Format-Table Name, Version, Architecture, Status -AutoSize | Out-String -Width 200" | Write-Host
+          if (-not (RuntimeOk)) {
+            # Diagnose: run Microsoft's installer directly and show what it says and installs.
+            $rt = "$env:RUNNER_TEMP\WindowsAppRuntimeInstall-x64.exe"
+            Invoke-WebRequest 'https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe' -OutFile $rt
+            $vi = (Get-Item $rt).VersionInfo
+            Write-Host "runtime installer: $($vi.FileVersion) / $($vi.ProductVersion), $((Get-Item $rt).Length) bytes"
+            & $rt 2>&1 | Write-Host
+            Write-Host "runtime installer exit code $LASTEXITCODE"
+            powershell.exe -NoProfile -Command "Get-AppxPackage -AllUsers *WindowsAppRuntime* | Format-Table Name, Version, Architecture, Status -AutoSize | Out-String -Width 200" | Write-Host
+          }
           if (-not (Test-Path "$dir\CloakDesk.exe")) { throw "not installed to $dir" }
           $run = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -ErrorAction SilentlyContinue).CloakDesk
           if ($run -ne "`"$dir\CloakDesk.exe`" --tray") { throw "startup task wrote Run key '$run'" }
