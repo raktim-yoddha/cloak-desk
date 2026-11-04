@@ -54,11 +54,23 @@
     <Content Include="Assets\*.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- No WebView or background tasks here: don't ship their DLLs. WinUI's .mui string files must stay. -->
+  <!-- Ship only the parts of the Windows App SDK runtime this app uses (measured: about 7 MB less):
+       - WebView2, background tasks, push notifications, the restart agent and designer support: never used.
+       - Microsoft.UI.Xaml.Phone.dll: phone-only controls (none of ours).
+       - *.winmd: type metadata for compilers; the NativeAOT exe has its projections built in.
+       - .mui strings for 88 languages: the app is English only, so only en-US stays
+         (WinUI needs those to start; other UI languages fall back to them). -->
   <Target Name="DropUnusedRuntimeFiles" AfterTargets="ComputeResolvedFilesToPublishList">
     <ItemGroup>
       <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
-        Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core' or '%(Filename)' == 'WebView2Loader' or '%(Filename)' == 'Microsoft.Windows.ApplicationModel.Background.UniversalBGTask'" />
+        Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core' or '%(Filename)' == 'WebView2Loader'
+                   or '%(Filename)' == 'Microsoft.Windows.ApplicationModel.Background.UniversalBGTask'
+                   or '%(Filename)' == 'PushNotificationsLongRunningTask.ProxyStub' or '%(Filename)' == 'RestartAgent'
+                   or '%(Filename)' == 'Microsoft.UI.Designer' or '%(Filename)' == 'Microsoft.UI.Xaml.Phone'
+                   or '%(Filename)%(Extension)' == 'Microsoft.UI.Xaml.Phone.dll.mui'
+                   or '%(Extension)' == '.winmd'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+        Condition="'%(Extension)' == '.mui' and !$([System.String]::Copy('%(RelativePath)').ToLowerInvariant().StartsWith('en-us'))" />
     </ItemGroup>
   </Target>
 
