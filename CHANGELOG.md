@@ -3,15 +3,22 @@
 All notable changes to Cloak Desk are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/).
 The release workflow publishes the section that matches the pushed tag as the release notes.
-0.x versions are initial development and are published as pre-releases.
 
 ## [Unreleased]
+
+## [0.1.1] - 2026-11-06
+
+Windows app is tray only: one pinnable panel next to the tray with every setting.
 
 ### Changed
 
 #### Cloak Desk for Windows
 - Tray only: the main window is gone. The tray panel is the whole app, a fixed-size flyout next to the tray (like Quick Settings) with every setting: cloak, presets (new, rename, delete), curtain color and image, hide desktop, hidden apps (add, remove), start with Windows, shortcuts, presets file. The middle scrolls; header, cloak switch and footer stay put.
 - Pin the panel (pin button or "Keep this panel open") to keep it open on top next to the tray. Remembered across restarts, so a pinned panel also opens at login.
+- Version is the plain release number (`0.1.1`), no `-alpha` suffix, and releases are no longer marked pre-release.
+
+#### Cloak Desk Browser Safety
+- Version 0.1.1, in step with the Windows app. No other changes.
 
 ## [0.1.0] - 2026-11-04
 
@@ -43,5 +50,6 @@ First release: Cloak Desk for Windows and the Cloak Desk Browser Safety extensio
 - Extension: not on the Chrome Web Store yet. It can't cover the browser's own UI (address bar, autofill), text in images, PDFs or canvas apps, or other desktop apps.
 - macOS and Linux versions are not implemented yet.
 
-[Unreleased]: https://github.com/raktim-yoddha/cloak-desk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/raktim-yoddha/cloak-desk/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/raktim-yoddha/cloak-desk/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/raktim-yoddha/cloak-desk/releases/tag/v0.1.0

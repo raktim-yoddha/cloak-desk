@@ -1,6 +1,6 @@
 {
   "name": "cloak-desk-browser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Cloak Desk Browser Safety: Chromium extension that hides sensitive details while you stream or share your screen.",
   "license": "UNLICENSED",

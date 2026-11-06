@@ -32,7 +32,7 @@ Crashes are logged to `%LOCALAPPDATA%\CloakDesk\crash.log`, next to `presets.jso
 
 ## Versioning and releases
 
-The version comes from git tags via [MinVer](https://github.com/adamralph/minver): tag `v1.2.3` builds `1.2.3`, untagged commits build `1.2.4-alpha.0.N`.
+The version comes from git tags via [MinVer](https://github.com/adamralph/minver): tag `v1.2.3` builds `1.2.3`, and commits after it build `1.2.3` too (no `-alpha` suffix).
 It is stamped into the exe's file properties, the tray panel footer and the setup file name.
 
 To release:
@@ -44,7 +44,7 @@ To release:
    (smoke, end-to-end, installer), checks the exe version matches, and publishes the GitHub release with
    `CloakDesk-Setup-X.Y.Z-x64.exe`, `-arm64.exe`, portable zips and `SHA256SUMS.txt`, notes from that section.
    Pushing an annotated tag `vX.Y.Z` yourself runs the same pipeline.
-3. 0.x versions and tags with a pre-release suffix are published as GitHub pre-releases.
+3. Only tags with a pre-release suffix (`v1.2.3-beta.1`) are published as GitHub pre-releases; 0.x versions are normal releases.
 
 Cloak Desk is in initial development, so versions are 0.MINOR.PATCH (first release `v0.1.0`):
 bump MINOR for new features or `presets.json` changes, PATCH for fixes. 1.0.0 comes once the app is declared stable;

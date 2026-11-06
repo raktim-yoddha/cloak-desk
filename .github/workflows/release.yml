@@ -6,7 +6,7 @@ name: Release
 # - Or push an annotated tag vX.Y.Z yourself.
 # Either way the full Windows build and test suite and the browser extension tests run first, and the
 # release notes are that section. The release carries the Windows setups/zips and CloakDesk-Browser-<v>.zip.
-# 0.x versions and versions with a -suffix are published as pre-releases.
+# Versions with a -suffix are published as pre-releases; everything else (0.x included) is a normal release.
 on:
   push:
     branches: [master]
@@ -92,8 +92,8 @@ jobs:
           $end = ($rest | Select-String -Pattern '^(## \[|\[[^\]]+\]: )').LineNumber | Select-Object -First 1
           $notes = if ($end) { $rest[0..($end - 2)] } else { $rest }
           ($notes -join "`n").Trim() | Set-Content notes.md
-          # 0.x is initial development (SemVer 4): shown as a pre-release, like any -suffix version.
-          "prerelease=$(($version.StartsWith('0.') -or $version.Contains('-')).ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          # Only -suffix versions are pre-releases; 0.x versions are normal releases.
+          "prerelease=$($version.Contains('-').ToString().ToLower())" >> $env:GITHUB_OUTPUT
 
       - uses: actions/download-artifact@v4
         with:

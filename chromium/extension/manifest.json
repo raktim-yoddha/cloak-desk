@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Cloak Desk Browser Safety",
   "short_name": "Cloak Desk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Hide emails, phone numbers, cards, IDs and API keys on every web page while you stream or share your screen.",
   "minimum_chrome_version": "120",
   "icons": {
