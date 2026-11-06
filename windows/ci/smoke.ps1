@@ -56,8 +56,8 @@ $crashed = $p.HasExited
 $alive = -not $crashed
 if ($alive) {
     $p.Refresh() # Process caches its counters from the first read
-    # Alive is not enough: a startup error dialog keeps the process alive too. Require the main window.
-    if ($p.MainWindowTitle -ne 'Cloak Desk') { Write-Host "[$Name] running but main window is '$($p.MainWindowTitle)'"; $alive = $false }
+    # Alive is not enough: a startup error dialog keeps the process alive too. Require the panel.
+    if ($p.MainWindowTitle -ne 'Cloak Desk panel') { Write-Host "[$Name] running but main window is '$($p.MainWindowTitle)'"; $alive = $false }
     Write-Host "[$Name] still running after $Seconds s, memory $([math]::Round($p.PrivateMemorySize64 / 1MB, 1)) MB private"
     Stop-Process -Id $p.Id -Force
 } else {

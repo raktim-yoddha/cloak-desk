@@ -7,6 +7,12 @@ The release workflow publishes the section that matches the pushed tag as the re
 
 ## [Unreleased]
 
+### Changed
+
+#### Cloak Desk for Windows
+- Tray only: the main window is gone. The tray panel is the whole app, a fixed-size flyout next to the tray (like Quick Settings) with every setting: cloak, presets (new, rename, delete), curtain color and image, hide desktop, hidden apps (add, remove), start with Windows, shortcuts, presets file. The middle scrolls; header, cloak switch and footer stay put.
+- Pin the panel (pin button or "Keep this panel open") to keep it open on top next to the tray. Remembered across restarts, so a pinned panel also opens at login.
+
 ## [0.1.0] - 2026-11-04
 
 First release: Cloak Desk for Windows and the Cloak Desk Browser Safety extension.

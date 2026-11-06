@@ -87,7 +87,7 @@
       <_XamlResources Include="$(OutDir)$(TargetName).pri;$(OutDir)*.xbf" />
     </ItemGroup>
     <Copy SourceFiles="@(_XamlResources)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
-    <Error Condition="!Exists('$(PublishDir)$(TargetName).pri') or !Exists('$(PublishDir)MainWindow.xbf')" Text="Publish output is missing $(TargetName).pri or MainWindow.xbf" />
+    <Error Condition="!Exists('$(PublishDir)$(TargetName).pri') or !Exists('$(PublishDir)TrayPanel.xbf')" Text="Publish output is missing $(TargetName).pri or TrayPanel.xbf" />
   </Target>
 
 </Project>

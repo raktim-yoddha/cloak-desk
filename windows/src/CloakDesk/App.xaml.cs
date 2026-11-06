@@ -10,6 +10,7 @@ namespace CloakDesk;
 public partial class App : Application
 {
     const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+    const string AppKey = @"Software\CloakDesk";
 
     public static new App Current => (App)Application.Current;
 
@@ -26,7 +27,6 @@ public partial class App : Application
 
     Stage? _stage;
     Tray? _tray;
-    MainWindow? _window;
     TrayPanel? _panel;
     long _panelClosedAt;
 
@@ -63,10 +63,11 @@ public partial class App : Application
 
         DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown; // keep living in the tray with no window
         var ui = DispatcherQueue.GetForCurrentThread();
-        main.Activated += (_, _) => ui.TryEnqueue(ShowWindow);
+        main.Activated += (_, _) => ui.TryEnqueue(OpenPanel); // second launch
         _tray = new Tray(this);
         _ = RequestBorderlessCaptureAsync();
-        if (!Environment.GetCommandLineArgs().Contains("--tray")) ShowWindow();
+        // No main window: the tray panel is the app. --tray (start with Windows) stays quiet unless it's pinned.
+        if (Pinned || !Environment.GetCommandLineArgs().Contains("--tray")) OpenPanel();
     }
 
     /// Without this, Windows 11 draws a yellow border around the whole screen while the Stage captures.
@@ -80,35 +81,33 @@ public partial class App : Application
         catch (Exception e) { System.Diagnostics.Debug.WriteLine(e); } // older Windows: the border just stays
     }
 
-    public void ShowWindow()
+    /// Open the panel, or bring it to the front if it's already open.
+    public void OpenPanel()
     {
-        if (_window is null)
+        if (_panel is null)
         {
-            _window = new MainWindow();
-            _window.Closed += (_, _) => _window = null; // closing frees the UI; the tray keeps running
+            _panel = new TrayPanel();
+            _panel.Closed += (_, _) =>
+            {
+                _panel = null;
+                _panelClosedAt = Environment.TickCount64;
+            };
         }
-        _window.Activate();
-        Native.SetForegroundWindow(Win32Interop.GetWindowFromWindowId(_window.AppWindow.Id));
+        _panel.Activate();
+        Native.SetForegroundWindow(Win32Interop.GetWindowFromWindowId(_panel.AppWindow.Id));
     }
 
-    /// Tray icon left click: open the compact panel, or close it if it's open.
+    /// Tray icon left click: open the panel, or close it if it's open and not pinned.
     public void TogglePanel()
     {
-        if (_panel is not null)
+        if (_panel is not null && !Pinned)
         {
             _panel.Close();
             return;
         }
         // Clicking the tray icon first takes focus from the panel, which closes it; don't reopen on that same click.
-        if (Environment.TickCount64 - _panelClosedAt < 300) return;
-        _panel = new TrayPanel();
-        _panel.Closed += (_, _) =>
-        {
-            _panel = null;
-            _panelClosedAt = Environment.TickCount64;
-        };
-        _panel.Activate();
-        Native.SetForegroundWindow(Win32Interop.GetWindowFromWindowId(_panel.AppWindow.Id));
+        if (_panel is null && Environment.TickCount64 - _panelClosedAt < 300) return;
+        OpenPanel();
     }
 
     public void ToggleCloak()
@@ -170,8 +169,22 @@ public partial class App : Application
         _stage?.Dispose();
         _tray?.Dispose();
         _panel?.Close();
-        _window?.Close();
         Exit();
+    }
+
+    /// Keep the panel open next to the tray. Remembered across restarts.
+    public static bool Pinned
+    {
+        get
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(AppKey);
+            return key?.GetValue("Pinned") is int v && v != 0;
+        }
+        set
+        {
+            using var key = Registry.CurrentUser.CreateSubKey(AppKey);
+            key.SetValue("Pinned", value ? 1 : 0, RegistryValueKind.DWord);
+        }
     }
 
     public static bool StartWithWindows

@@ -135,14 +135,6 @@ static unsafe partial class Native
         finally { CloseHandle(p); }
     }
 
-    /// Work area (screen minus taskbar) of the monitor that contains p.
-    public static RECT WorkAreaAt(POINT p)
-    {
-        var mi = new MONITORINFO { cbSize = sizeof(MONITORINFO) };
-        GetMonitorInfoW(MonitorFromPoint(p, 2 /* MONITOR_DEFAULTTONEAREST */), ref mi);
-        return mi.rcWork;
-    }
-
     public static MONITORINFO PrimaryMonitor(out nint hmon)
     {
         hmon = MonitorFromPoint(default, 1 /* MONITOR_DEFAULTTOPRIMARY */);

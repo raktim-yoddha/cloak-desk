@@ -43,7 +43,7 @@ monitor capture (GPU texture, ~1 frame)
 - **Latency.** Window rectangles are read when each frame arrives, so the curtain
   and frame match. Expect one extra frame of delay (~16 ms at 60 Hz). Curtains
   are padded by a few pixels so a window being dragged fast doesn't leak an edge.
-- **Self-hiding.** Cloak Desk's settings window uses the OS capture exclusion flag.
+- **Self-hiding.** Cloak Desk's tray panel uses the OS capture exclusion flag.
   The Stage window can't use it, because then meeting apps couldn't capture it
   either, so the compositor curtains it instead.
 - **Placement.** Keep the Stage on a second monitor, or behind your other windows.
@@ -89,7 +89,7 @@ colors and the desktop flag. App IDs have to be picked again.
 
 ## Resource budget
 
-- Idle in tray: no capture, no timers, settings window destroyed (not just hidden).
+- Idle in tray: no capture, no timers, tray panel destroyed when closed (not just hidden), unless pinned.
 - Cloaked: one capture stream, one GPU copy plus rectangle fills per frame, no CPU pixel work.
 - No web view, no bundled runtime beyond what the OS provides.
 

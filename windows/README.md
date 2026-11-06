@@ -27,13 +27,13 @@ If publish can't find the linker, put `C:\Program Files (x86)\Microsoft Visual S
 
 Installer (Inno Setup 6): `iscc /DAppVersion=1.0.0 /DArch=x64 /DSourceDir=..\..\out-x64 windows\installer\CloakDesk.iss`.
 
-`CLOAKDESK_CAPTURABLE=1` makes the settings window capturable, for screenshots of the app itself.
+`CLOAKDESK_CAPTURABLE=1` makes the tray panel capturable, for screenshots of the app itself.
 Crashes are logged to `%LOCALAPPDATA%\CloakDesk\crash.log`, next to `presets.json`.
 
 ## Versioning and releases
 
 The version comes from git tags via [MinVer](https://github.com/adamralph/minver): tag `v1.2.3` builds `1.2.3`, untagged commits build `1.2.4-alpha.0.N`.
-It is stamped into the exe's file properties, the Settings > About row and the setup file name.
+It is stamped into the exe's file properties, the tray panel footer and the setup file name.
 
 To release:
 

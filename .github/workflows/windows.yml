@@ -142,12 +142,6 @@ jobs:
         shell: powershell
         run: ./windows/ci/e2e.ps1 -Exe out-x64/CloakDesk.exe -Out e2e
 
-      - name: Screenshot tour
-        if: matrix.arch == 'x64'
-        continue-on-error: true
-        shell: powershell
-        run: ./windows/ci/tour.ps1 -Exe out-x64/CloakDesk.exe -Out tour
-
       - uses: actions/upload-artifact@v4
         if: steps.installer.outcome == 'success'
         with:
@@ -161,7 +155,6 @@ jobs:
           path: |
             smoke
             e2e
-            tour
             publish.log
 
       # Screenshots and results on a throwaway branch, readable with plain git (latest branch run only).
@@ -172,7 +165,7 @@ jobs:
         run: |
           $dst = Join-Path $env:RUNNER_TEMP ci
           New-Item -ItemType Directory -Force $dst | Out-Null
-          foreach ($d in 'smoke', 'e2e', 'tour') { if (Test-Path $d) { Copy-Item $d $dst -Recurse } }
+          foreach ($d in 'smoke', 'e2e') { if (Test-Path $d) { Copy-Item $d $dst -Recurse } }
           if (Test-Path publish.log) { Copy-Item publish.log $dst }
           if (Test-Path size.txt) { Copy-Item size.txt $dst }
           if (Test-Path setup.log) { Copy-Item setup.log $dst }

@@ -63,7 +63,7 @@ public sealed unsafe partial class Tray : IDisposable
         }
         if (msg == CallbackMessage)
         {
-            if ((uint)l == Native.WM_LBUTTONUP) _app.TogglePanel(); // compact panel; the full window is one click further
+            if ((uint)l == Native.WM_LBUTTONUP) _app.TogglePanel();
             else if ((uint)l == Native.WM_RBUTTONUP) ShowMenu();
             return 0;
         }
@@ -76,7 +76,7 @@ public sealed unsafe partial class Tray : IDisposable
         const int Open = 1, Cloak = 2, Exit = 3, FirstPreset = 100;
 
         nint menu = Native.CreatePopupMenu();
-        Native.AppendMenuW(menu, MF_STRING, Open, "Open Cloak Desk");
+        Native.AppendMenuW(menu, MF_STRING, Open, "Open panel");
         Native.AppendMenuW(menu, MF_STRING | (_app.IsCloaked ? MF_CHECKED : 0), Cloak, "Cloak\tCtrl+Alt+C");
         Native.AppendMenuW(menu, MF_SEPARATOR, 0, null);
         var presets = _app.Presets.Presets;
@@ -93,7 +93,7 @@ public sealed unsafe partial class Tray : IDisposable
 
         switch (cmd)
         {
-            case Open: _app.ShowWindow(); break;
+            case Open: _app.OpenPanel(); break;
             case Cloak: _app.ToggleCloak(); break;
             case Exit: _app.Quit(); break;
             case >= FirstPreset: _app.SelectPreset(cmd - FirstPreset); break;
