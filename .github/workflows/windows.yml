@@ -1,0 +1,191 @@
+name: Windows
+
+on:
+  push:
+    branches: ["**"]
+    paths: ["windows/**", ".github/workflows/windows.yml"]
+  pull_request:
+    paths: ["windows/**", ".github/workflows/windows.yml"]
+  workflow_dispatch:
+  workflow_call: # release.yml runs the same build and smoke test before packaging
+
+permissions:
+  contents: write # only to push test screenshots to the ci-artifacts branch
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # MinVer reads the version from tags
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Curtain math checks
+        if: matrix.arch == 'x64'
+        run: dotnet run --project windows/tests/CurtainMath.Check
+
+      - name: Publish (NativeAOT, ${{ matrix.arch }})
+        shell: pwsh
+        run: |
+          $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
+          dotnet publish windows/src/CloakDesk -c Release -r win-${{ matrix.arch }} -p:Platform=${{ matrix.arch }} -o out-${{ matrix.arch }} 2>&1 | Tee-Object publish.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Write-Host "---- interop and trimming warnings"
+          Select-String -Path publish.log -Pattern 'warning (CsWinRT|IL\d|WMC|XLS)' | ForEach-Object { $_.Line } | Sort-Object -Unique
+          $exe = Get-Item out-${{ matrix.arch }}/CloakDesk.exe
+          $size = (Get-ChildItem out-${{ matrix.arch }} -Recurse -File | Measure-Object Length -Sum).Sum
+          $files = Get-ChildItem out-${{ matrix.arch }} -Recurse -File
+          Write-Host ("---- version {0}, {1} files, publish size {2:N1} MB" -f $exe.VersionInfo.ProductVersion, $files.Count, ($size / 1MB))
+          $files | Sort-Object Length -Descending | Select-Object -First 15 | ForEach-Object { "{0,8:N0} KB  {1}" -f ($_.Length / 1KB), $_.Name }
+          # Size breakdown, also kept in size.txt on the ci-artifacts branch
+          $root = (Resolve-Path out-${{ matrix.arch }}).Path
+          & {
+            "== by folder"
+            $files | Group-Object { $d = Split-Path $_.FullName.Substring($root.Length + 1) -Parent; if ($d) { $d.Split('\')[0] } else { '.' } } |
+              ForEach-Object { [pscustomobject]@{ Name = $_.Name; Count = $_.Count; KB = ($_.Group | Measure-Object Length -Sum).Sum / 1KB } } |
+              Sort-Object KB -Descending | ForEach-Object { "{0,10:N0} KB {1,4} files  {2}" -f $_.KB, $_.Count, $_.Name }
+            "== by extension"
+            $files | Group-Object Extension | ForEach-Object { [pscustomobject]@{ Name = $_.Name; Count = $_.Count; KB = ($_.Group | Measure-Object Length -Sum).Sum / 1KB } } |
+              Sort-Object KB -Descending | ForEach-Object { "{0,10:N0} KB {1,4} files  {2}" -f $_.KB, $_.Count, $_.Name }
+            "== all files"
+            $files | Sort-Object Length -Descending | ForEach-Object { "{0,10:N0} KB  {1}" -f ($_.Length / 1KB), $_.FullName.Substring($root.Length + 1) }
+          } | Set-Content size.txt
+          Get-Content size.txt | Select-String -NotMatch '^\s+\d+ KB\s+2 files' | Select-Object -First 80
+
+      - name: Build (Debug, JIT, console)
+        if: matrix.arch == 'x64'
+        run: dotnet build windows/src/CloakDesk -c Debug -r win-x64 -p:Platform=x64 -p:OutputType=Exe -o debug
+
+      # First, on a machine that may not have the Windows App Runtime yet: setup must install it, and the
+      # framework-dependent app needs it for every test below.
+      - name: Installer test (build, silent install, launch, uninstall)
+        id: installer
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null }
+          $v = (Get-Item out-x64/CloakDesk.exe).VersionInfo.ProductVersion.Split('+')[0]
+          & $iscc /Qp "/DAppVersion=$v" /DArch=x64 "/DSourceDir=$PWD\out-x64" windows\installer\CloakDesk.iss
+          if ($LASTEXITCODE) { throw "ISCC failed" }
+          $setup = Get-Item "windows\installer\output\CloakDesk-Setup-$v-x64.exe"
+          # Get-AppxPackage needs Windows PowerShell (not pwsh 7). The minimum comes from the setup script.
+          $min = [regex]::Match((Get-Content windows\installer\CloakDesk.iss -Raw), '#define RuntimeMinVersion "([^"]+)"').Groups[1].Value
+          function RuntimeOk { (powershell.exe -NoProfile -Command "[bool](Get-AppxPackage -Name Microsoft.WindowsAppRuntime.1.8 | Where-Object { `$_.Architecture -eq 'X64' -and [version]`$_.Version -ge [version]'$min' })") -eq 'True' }
+          # The minimum must match the Microsoft.WindowsAppSDK.Runtime package the app is built with.
+          $info = Get-ChildItem "$env:USERPROFILE\.nuget\packages\microsoft.windowsappsdk.runtime" -Recurse -Filter 'WindowsAppSDK-VersionInfo.*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($info) {
+            $pkg = [regex]::Matches((Get-Content $info.FullName -Raw), '8000\.\d+\.\d+\.\d+') | ForEach-Object Value | Select-Object -Unique
+            Write-Host "Runtime version in $($info.Name): $($pkg -join ', '); setup minimum: $min"
+            if ($pkg -and $pkg -notcontains $min) { throw "RuntimeMinVersion $min in CloakDesk.iss doesn't match the Microsoft.WindowsAppSDK.Runtime package ($($pkg -join ', '))" }
+          }
+          powershell.exe -NoProfile -Command "Get-AppxPackage -Name Microsoft.WindowsAppRuntime.1.8 | Format-Table Name, Version, Architecture -AutoSize | Out-String" | Write-Host
+          Write-Host "Windows App Runtime 1.8 >= $min present before setup: $(RuntimeOk) (setup installs or updates it when not)"
+          Write-Host ("setup: {0} ({1:N1} MB), file version {2}" -f $setup.Name, ($setup.Length / 1MB), $setup.VersionInfo.ProductVersion)
+          $dir = "$env:LOCALAPPDATA\Programs\Cloak Desk"
+          Start-Process $setup.FullName -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=startup', "/LOG=$PWD\setup.log" -Wait
+          Write-Host '---- setup log (runtime part)'
+          Get-Content setup.log | Select-String -Pattern 'Runtime|runtime|Download|download|PrepareToInstall|error|Error' | ForEach-Object { $_.Line }
+          Write-Host "Windows App Runtime 1.8 >= $min present after setup: $(RuntimeOk)"
+          Write-Host '---- runtime packages after setup (all users)'
+          powershell.exe -NoProfile -Command "Get-AppxPackage -AllUsers *WindowsAppRuntime* | Format-Table Name, Version, Architecture, Status -AutoSize | Out-String -Width 200" | Write-Host
+          if (-not (RuntimeOk)) {
+            # Diagnose: run Microsoft's installer directly and show what it says and installs.
+            $rt = "$env:RUNNER_TEMP\WindowsAppRuntimeInstall-x64.exe"
+            Invoke-WebRequest 'https://aka.ms/windowsappsdk/1.8/latest/windowsappruntimeinstall-x64.exe' -OutFile $rt
+            $vi = (Get-Item $rt).VersionInfo
+            Write-Host "runtime installer: $($vi.FileVersion) / $($vi.ProductVersion), $((Get-Item $rt).Length) bytes"
+            & $rt 2>&1 | Write-Host
+            Write-Host "runtime installer exit code $LASTEXITCODE"
+            powershell.exe -NoProfile -Command "Get-AppxPackage -AllUsers *WindowsAppRuntime* | Format-Table Name, Version, Architecture, Status -AutoSize | Out-String -Width 200" | Write-Host
+          }
+          if (-not (Test-Path "$dir\CloakDesk.exe")) { throw "not installed to $dir" }
+          $run = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -ErrorAction SilentlyContinue).CloakDesk
+          if ($run -ne "`"$dir\CloakDesk.exe`" --tray") { throw "startup task wrote Run key '$run'" }
+          if (-not (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Cloak Desk.lnk")) { throw "no Start menu shortcut" }
+          ./windows/ci/smoke.ps1 -Exe "$dir\CloakDesk.exe" -Out smoke -Name installed -Seconds 10
+          if ($LASTEXITCODE) { throw "installed app did not start" }
+          Start-Process "$dir\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES' -Wait
+          Start-Sleep -Seconds 3
+          if (Test-Path "$dir\CloakDesk.exe") { throw "uninstall left the app behind" }
+          if ((Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -ErrorAction SilentlyContinue).CloakDesk) { throw "uninstall left the Run key" }
+          if (-not (RuntimeOk)) { throw "Windows App Runtime 1.8 >= $min not installed after setup" }
+          Write-Host "installer: install, launch and uninstall OK (the runtime stays: it's shared)"
+
+      - name: Smoke test (Debug)
+        id: smoke_debug
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        shell: pwsh
+        run: ./windows/ci/smoke.ps1 -Exe debug/CloakDesk.exe -Out smoke -Name debug -Debugger
+
+      - name: Smoke test (Release AOT)
+        id: smoke_release
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        shell: pwsh
+        run: ./windows/ci/smoke.ps1 -Exe out-x64/CloakDesk.exe -Out smoke -Name release -Debugger
+
+      - name: End-to-end test (Release AOT)
+        id: e2e
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        shell: powershell
+        run: ./windows/ci/e2e.ps1 -Exe out-x64/CloakDesk.exe -Out e2e
+
+      - name: Screenshot tour
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        shell: powershell
+        run: ./windows/ci/tour.ps1 -Exe out-x64/CloakDesk.exe -Out tour
+
+      - uses: actions/upload-artifact@v4
+        if: steps.installer.outcome == 'success'
+        with:
+          name: CloakDesk-Setup-x64
+          path: windows/installer/output/CloakDesk-Setup-*-x64.exe
+
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.arch == 'x64'
+        with:
+          name: smoke
+          path: |
+            smoke
+            e2e
+            tour
+            publish.log
+
+      # Screenshots and results on a throwaway branch, readable with plain git (latest branch run only).
+      - name: Publish test results to the ci-artifacts branch
+        if: always() && matrix.arch == 'x64' && github.ref_type == 'branch' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        continue-on-error: true # convenience copy only; a GitHub hiccup here must not fail the build
+        shell: pwsh
+        run: |
+          $dst = Join-Path $env:RUNNER_TEMP ci
+          New-Item -ItemType Directory -Force $dst | Out-Null
+          foreach ($d in 'smoke', 'e2e', 'tour') { if (Test-Path $d) { Copy-Item $d $dst -Recurse } }
+          if (Test-Path publish.log) { Copy-Item publish.log $dst }
+          if (Test-Path size.txt) { Copy-Item size.txt $dst }
+          if (Test-Path setup.log) { Copy-Item setup.log $dst }
+          Set-Location $dst
+          git init -q; git checkout -q -b ci-artifacts; git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Run ${{ github.run_id }} on ${{ github.ref_name }} @ ${{ github.sha }}"
+          for ($i = 0; $i -lt 3; $i++) { git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-artifacts; if (-not $LASTEXITCODE) { break }; Start-Sleep 10 }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CloakDesk-win-${{ matrix.arch }}
+          path: out-${{ matrix.arch }}
+
+      - name: Fail if the app crashed
+        if: matrix.arch == 'x64' && (steps.smoke_debug.outcome != 'success' || steps.smoke_release.outcome != 'success' || steps.e2e.outcome != 'success' || steps.installer.outcome != 'success')
+        run: exit 1

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cloak Desk</title>
+    <link rel="stylesheet" href="../ui/ui.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="top">
+      <img class="mark" src="../../icons/app-32.png" alt="" width="20" height="20" />
+      <span class="name">Cloak Desk</span>
+      <button class="btn btn-icon" id="openSettings" title="Settings" aria-label="Settings"><span data-icon="sliders"></span></button>
+    </header>
+
+    <section class="panel hero" aria-live="polite">
+      <div class="hero-row">
+        <div class="hero-text">
+          <label class="hero-title" for="master" id="heroTitle">Not protected</label>
+          <p class="status"><span class="dot" id="dot"></span><span id="statusText">Off</span></p>
+        </div>
+        <button class="switch switch-lg" role="switch" id="master" aria-checked="false"></button>
+      </div>
+
+      <div class="well viewer" id="viewer" data-cover="redact" aria-label="Preview of what viewers see">
+        <span class="viewer-label">Viewers see</span>
+        <div class="viewer-lines">
+          <span class="sample">raktim@gmail.com<i class="cover"></i></span>
+          <span class="sample">+91 98765 43210<i class="cover"></i></span>
+          <span class="sample">ghp_8fK2xQ9mVt7L<i class="cover"></i></span>
+        </div>
+      </div>
+      <button class="link reset" id="resetShare" hidden>Not sharing anymore?</button>
+    </section>
+
+    <section class="panel group">
+      <div class="row row-stack">
+        <div class="row-head">
+          <span class="row-label">Hide</span>
+          <div class="seg" role="radiogroup" aria-label="When to hide" id="mode">
+            <button role="radio" data-mode="always" aria-checked="true">Always</button>
+            <button role="radio" data-mode="sharing" aria-checked="false">When sharing</button>
+          </div>
+        </div>
+        <p class="note" id="modeNote"></p>
+      </div>
+
+      <div id="site">
+        <div class="row">
+          <label class="row-label" for="siteSwitch">Hide on <span class="host" id="host"></span></label>
+          <button class="switch" role="switch" id="siteSwitch" aria-checked="true"></button>
+        </div>
+        <div class="row">
+          <label class="row-label" for="curtainSwitch">Cover the whole page</label>
+          <button class="switch" role="switch" id="curtainSwitch" aria-checked="false"></button>
+        </div>
+      </div>
+      <div class="row" id="noSite" hidden>
+        <p class="note flush">Chrome doesn't allow extensions on this page.</p>
+      </div>
+
+      <button class="row row-link" id="detecting">
+        <span class="row-label">Detecting</span>
+        <span class="row-value" id="detectSummary"></span>
+        <span data-icon="chevron" class="chev"></span>
+      </button>
+    </section>
+
+    <footer class="foot">
+      <span id="shortcut"></span>
+      <button class="link" id="more">All settings</button>
+    </footer>
+
+    <script src="../shared/settings.js"></script>
+    <script src="../shared/detectors.js"></script>
+    <script src="../ui/icons.js"></script>
+    <script src="../ui/store.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

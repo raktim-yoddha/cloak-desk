@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+*.user
+windows/publish/
+node_modules/
+chromium/test-results/
+chromium/dist/

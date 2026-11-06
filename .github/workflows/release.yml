@@ -1,0 +1,138 @@
+name: Release
+
+# Two ways to release, both SemVer and both driven by CHANGELOG.md:
+# - Merge to master a commit whose CHANGELOG.md has a new "## [x.y.z] - date" section: this workflow
+#   creates the annotated tag vX.Y.Z (message from that section) and publishes the release.
+# - Or push an annotated tag vX.Y.Z yourself.
+# Either way the full Windows build and test suite and the browser extension tests run first, and the
+# release notes are that section. The release carries the Windows setups/zips and CloakDesk-Browser-<v>.zip.
+# 0.x versions and versions with a -suffix are published as pre-releases.
+on:
+  push:
+    branches: [master]
+    paths: [CHANGELOG.md]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      release: ${{ steps.v.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide version, tag if needed
+        id: v
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            v="${GITHUB_REF_NAME#v}"
+          else
+            v=$(grep -m1 -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(?=\])' CHANGELOG.md || true)
+            if [[ -z "$v" ]]; then echo "No released version in CHANGELOG.md"; echo "release=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+            if git rev-parse -q --verify "refs/tags/v$v" > /dev/null; then
+              echo "v$v already tagged, nothing to release"; echo "release=false" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            # Annotated tag: subject is the first line under the heading, body is the whole section.
+            section=$(awk -v h="## [$v]" 'index($0, h) == 1 {on=1; next} on && /^## \[/ {exit} on' CHANGELOG.md)
+            summary=$(printf '%s\n' "$section" | grep -m1 -v '^\s*$' || echo "release")
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "v$v" -m "Cloak Desk $v: $summary" -m "$section"
+            git push origin "v$v"
+          fi
+          [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "v$v is not SemVer"; exit 1; }
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "release=true" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: prepare
+    if: needs.prepare.outputs.release == 'true'
+    uses: ./.github/workflows/windows.yml
+    permissions:
+      contents: write
+
+  extension:
+    needs: prepare
+    if: needs.prepare.outputs.release == 'true'
+    uses: ./.github/workflows/chromium.yml
+
+  release:
+    needs: [prepare, build, extension]
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Release notes and pre-release flag
+        id: meta
+        shell: pwsh
+        run: |
+          $version = $env:VERSION
+          $lines = Get-Content CHANGELOG.md
+          $start = ($lines | Select-String -Pattern "^## \[$([regex]::Escape($version))\]").LineNumber
+          if (-not $start) { throw "CHANGELOG.md has no '## [$version]' section" }
+          $rest = $lines[$start..($lines.Count - 1)]
+          $end = ($rest | Select-String -Pattern '^(## \[|\[[^\]]+\]: )').LineNumber | Select-Object -First 1
+          $notes = if ($end) { $rest[0..($end - 2)] } else { $rest }
+          ($notes -join "`n").Trim() | Set-Content notes.md
+          # 0.x is initial development (SemVer 4): shown as a pre-release, like any -suffix version.
+          "prerelease=$(($version.StartsWith('0.') -or $version.Contains('-')).ToString().ToLower())" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: CloakDesk-win-*
+
+      - name: Check the exe carries the release version
+        shell: pwsh
+        run: |
+          foreach ($arch in 'x64', 'arm64') {
+            $v = (Get-Item "CloakDesk-win-$arch/CloakDesk.exe").VersionInfo.ProductVersion.Split('+')[0]
+            if ($v -ne $env:VERSION) { throw "$arch exe is $v, release is $env:VERSION" }
+          }
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: CloakDesk-Browser
+          path: dist
+
+      - name: Build installers and zips
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null }
+          $v = $env:VERSION
+          New-Item -ItemType Directory -Force dist | Out-Null
+          foreach ($arch in 'x64', 'arm64') {
+            & $iscc /Qp "/DAppVersion=$v" "/DArch=$arch" "/DSourceDir=$PWD\CloakDesk-win-$arch" windows\installer\CloakDesk.iss
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            Move-Item "windows\installer\output\CloakDesk-Setup-$v-$arch.exe" dist\
+            Compress-Archive "CloakDesk-win-$arch\*" "dist\CloakDesk-$v-$arch-portable.zip"
+          }
+          $sums = Get-ChildItem dist -File | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName SHA256).Hash.ToLower(), $_.Name }
+          $sums | Set-Content dist\SHA256SUMS.txt
+          Get-ChildItem dist | ForEach-Object { "{0,10:N1} MB  {1}" -f ($_.Length / 1MB), $_.Name }
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Cloak Desk ${{ env.VERSION }}
+          body_path: notes.md
+          prerelease: ${{ steps.meta.outputs.prerelease }}
+          files: dist/*

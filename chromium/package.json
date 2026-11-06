@@ -1,0 +1,17 @@
+{
+  "name": "cloak-desk-browser",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloak Desk Browser Safety: Chromium extension that hides sensitive details while you stream or share your screen.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node --test tests/detectors.test.js",
+    "e2e": "node tests/e2e.js",
+    "icons": "node scripts/make-icons.js",
+    "check": "node scripts/check.js",
+    "pack": "node scripts/check.js && mkdir -p dist && cd extension && zip -qr -X ../dist/CloakDesk-Browser-$npm_package_version.zip . -x '.*'"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

@@ -1,0 +1,93 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <RootNamespace>CloakDesk</RootNamespace>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\CloakDesk.ico</ApplicationIcon>
+
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Framework-dependent: WinUI comes from Microsoft's shared Windows App Runtime 1.8 (installed once per PC,
+         shared by every app that uses it) instead of ~45 MB bundled with the app. The setup installs the runtime
+         when it's missing. With this off, the Windows App SDK adds a bootstrap auto-initializer that finds the
+         runtime at startup and shows Microsoft's install prompt if it isn't there (portable zip). -->
+    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+
+    <!-- Small, fast: one native exe, no .NET runtime to install. -->
+    <PublishAot>true</PublishAot>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Level 2 also flags non-partial classes implementing mapped .NET interfaces (INotifyPropertyChanged),
+         which otherwise build clean and fail at runtime with E_NOINTERFACE under NativeAOT. -->
+    <CsWinRTAotWarningLevel>2</CsWinRTAotWarningLevel>
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+  </PropertyGroup>
+
+  <!-- Version = SemVer from the latest vX.Y.Z git tag (MinVer). Stamped into the exe's file version and the About row. -->
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.0</MinVerDefaultPreReleaseIdentifiers>
+    <Product>Cloak Desk</Product>
+    <Company>Cloak Desk contributors</Company>
+    <Copyright>Copyright © Cloak Desk contributors</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
+    <!-- WinUI component only (pulls Foundation + InteractiveExperiences). The Microsoft.WindowsAppSDK
+         metapackage would also bundle AI, ML (ONNX Runtime), Widgets and DWrite, which Cloak Desk never uses. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="1.8.260709004" />
+    <!-- Framework-dependent: the runtime this WinUI build pairs with (both from Windows App SDK 1.8.260710003).
+         Sets the minimum Windows App Runtime 1.8 (8000.921.1539.0). Keep it at or below what Microsoft's
+         public installer (aka.ms/windowsappsdk/1.8/latest) ships, or setup can't satisfy it. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="1.8.260710003" />
+    <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\*.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Ship only the Windows App SDK files this app uses. Mostly matters for a self-contained build
+       (WindowsAppSDKSelfContained=true, about 7 MB less measured); harmless for the framework-dependent one:
+       - WebView2, background tasks, push notifications, the restart agent and designer support: never used.
+       - *.winmd: type metadata for compilers; the NativeAOT exe has its projections built in.
+       - .mui strings for 88 languages: the app is English only, so only en-us stays
+         (WinUI needs those to start; other UI languages fall back to them).
+       Keep Microsoft.UI.Xaml.Phone.dll despite its name: XAML loads it when the NavigationView selects an item. -->
+  <Target Name="DropUnusedRuntimeFiles" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+        Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Core' or '%(Filename)' == 'WebView2Loader'
+                   or '%(Filename)' == 'Microsoft.Windows.ApplicationModel.Background.UniversalBGTask'
+                   or '%(Filename)' == 'PushNotificationsLongRunningTask.ProxyStub' or '%(Filename)' == 'RestartAgent'
+                   or '%(Filename)' == 'Microsoft.UI.Designer'
+                   or '%(Extension)' == '.winmd'" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+        Condition="'%(Extension)' == '.mui' and !$([System.String]::Copy('%(RelativePath)').ToLowerInvariant().StartsWith('en-us'))" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Self-contained unpackaged publish leaves out the app's resource index and compiled XAML, so
+       LoadComponent fails with "XAML parsing failed". Copy them from the build output. -->
+  <Target Name="PublishXamlResources" AfterTargets="Publish">
+    <ItemGroup>
+      <_XamlResources Include="$(OutDir)$(TargetName).pri;$(OutDir)*.xbf" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_XamlResources)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+    <Error Condition="!Exists('$(PublishDir)$(TargetName).pri') or !Exists('$(PublishDir)MainWindow.xbf')" Text="Publish output is missing $(TargetName).pri or MainWindow.xbf" />
+  </Target>
+
+</Project>

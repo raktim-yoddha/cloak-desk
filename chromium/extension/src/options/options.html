@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cloak Desk Settings</title>
+    <link rel="icon" href="../../icons/app-32.png" />
+    <link rel="stylesheet" href="../ui/ui.css" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="side">
+        <div class="brand"><img src="../../icons/app-32.png" alt="" width="20" height="20" />Cloak Desk</div>
+        <nav aria-label="Sections">
+          <a href="#general"><span data-icon="sliders"></span>General</a>
+          <a href="#detection"><span data-icon="eye-off"></span>Detection</a>
+          <a href="#words"><span data-icon="text"></span>Your words</a>
+          <a href="#more"><span data-icon="field"></span>More places</a>
+          <a href="#sites"><span data-icon="globe"></span>Sites</a>
+          <a href="#appearance"><span data-icon="palette"></span>Appearance</a>
+          <a href="#privacy"><span data-icon="lock"></span>Privacy</a>
+          <a href="#data"><span data-icon="download"></span>Data</a>
+        </nav>
+        <div class="side-status">
+          <span class="dot" id="navDot"></span><span id="navStatus">Off</span>
+          <button class="switch" role="switch" id="sideSwitch" aria-checked="false" aria-label="Protection"></button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="welcome panel" id="welcome" hidden>
+          <div class="welcome-text">
+            <h1>Hide what viewers shouldn't see</h1>
+            <p>Covers emails, phone numbers, cards, IDs and API keys on every page while you share your screen. You see the covers too.</p>
+            <div class="well welcome-viewer" id="welcomeViewer" aria-label="Preview of what viewers see">
+              <span class="viewer-label">Viewers see</span>
+              <span class="sample">raktim.yoddha@gmail.com<i class="cover"></i></span>
+              <span class="sample">+91 98765 43210<i class="cover"></i></span>
+              <span class="sample">4111 1111 1111 1111<i class="cover"></i></span>
+              <span class="sample">ghp_8fK2xQ9mVt7Lr1ZsP0<i class="cover"></i></span>
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" id="welcomeEnable">Turn on protection</button>
+              <a class="btn btn-quiet" href="#appearance">See an example</a>
+            </div>
+            <p class="hint">Pin it from the puzzle icon in the toolbar.</p>
+          </div>
+        </section>
+
+        <section id="general">
+          <h2>General</h2>
+          <div class="list">
+            <div class="row">
+              <div class="row-text">
+                <label class="row-title" for="master">Protection</label>
+                <p class="row-desc" id="masterDesc">Off</p>
+              </div>
+              <button class="switch" role="switch" id="master" aria-checked="false"></button>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Keyboard shortcut</span>
+                <p class="row-desc">From any tab</p>
+              </div>
+              <span class="keys" id="keys"></span>
+              <button class="btn" id="shortcutBtn">Change</button>
+            </div>
+          </div>
+
+          <h3>When to hide</h3>
+          <div class="list" role="radiogroup" aria-label="When to hide" id="mode">
+            <button class="row row-radio" role="radio" data-mode="always" aria-checked="true">
+              <span class="radio" aria-hidden="true"></span>
+              <span class="row-text">
+                <span class="row-title">Always</span>
+                <span class="row-desc">For OBS, Zoom and other desktop apps</span>
+              </span>
+            </button>
+            <button class="row row-radio" role="radio" data-mode="sharing" aria-checked="false">
+              <span class="radio" aria-hidden="true"></span>
+              <span class="row-text">
+                <span class="row-title">Only while this browser shares</span>
+                <span class="row-desc">When a tab like Meet shares your screen</span>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <section id="detection">
+          <h2>Detection</h2>
+          <p class="lead">Found anywhere on a page. Card, IBAN and Aadhaar numbers are checksum-verified.</p>
+          <div class="list" id="detectors"></div>
+        </section>
+
+        <section id="words">
+          <h2>Your words</h2>
+          <p class="lead">Names, addresses, anything personal. Any letter case.</p>
+          <div class="tags" id="wordsTags"><input id="wordsInput" placeholder="Add a word or phrase, then press Enter" autocomplete="off" spellcheck="false" aria-label="Add a word or phrase" /></div>
+          <p class="hint">Or right-click selected text and choose Always hide.</p>
+          <details class="disclosure">
+            <summary>Patterns</summary>
+            <div class="tags" id="patternsTags"><input id="patternsInput" placeholder="/EMP-\d{5}/" autocomplete="off" spellcheck="false" aria-label="Add a pattern" /></div>
+            <p class="hint">JavaScript regular expressions</p>
+          </details>
+        </section>
+
+        <section id="more">
+          <h2>More places</h2>
+          <div class="list">
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Form fields</span>
+                <p class="row-desc">Sensitive fields show dots</p>
+              </div>
+              <button class="switch" role="switch" data-key="fields" aria-label="Form fields"></button>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Tab titles</span>
+                <p class="row-desc">Details removed from tab names</p>
+              </div>
+              <button class="switch" role="switch" data-key="titles" aria-label="Tab titles"></button>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Notifications</span>
+                <p class="row-desc">Pop-ups show the site, not the message</p>
+              </div>
+              <button class="switch" role="switch" data-key="notifications" aria-label="Notifications"></button>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Count on toolbar button</span>
+                <p class="row-desc">Covered details on the page</p>
+              </div>
+              <button class="switch" role="switch" data-key="badge" aria-label="Count on toolbar button"></button>
+            </div>
+          </div>
+        </section>
+
+        <section id="sites">
+          <h2>Sites</h2>
+          <div class="field">
+            <label class="field-title" for="curtainInput">Cover completely</label>
+            <p class="row-desc">Replaces the whole page. For password managers and banks.</p>
+            <div class="tags" id="curtainTags"><input id="curtainInput" placeholder="bank.example.com" autocomplete="off" spellcheck="false" /></div>
+          </div>
+          <div class="field">
+            <label class="field-title" for="allowInput">Never hide on</label>
+            <p class="row-desc">Subdomains included</p>
+            <div class="tags" id="allowTags"><input id="allowInput" placeholder="example.com" autocomplete="off" spellcheck="false" /></div>
+          </div>
+        </section>
+
+        <section id="appearance">
+          <h2>Appearance</h2>
+          <div class="list">
+            <div class="row">
+              <span class="row-title">Style</span>
+              <div class="seg seg-3" role="radiogroup" aria-label="Style" id="styles">
+                <button role="radio" data-style="redact">Solid</button>
+                <button role="radio" data-style="blur">Frosted</button>
+                <button role="radio" data-style="tint">Tint</button>
+              </div>
+            </div>
+            <div class="row">
+              <span class="row-title">Color</span>
+              <div class="swatches" role="radiogroup" aria-label="Color" id="swatches"></div>
+            </div>
+          </div>
+
+          <div class="preview panel" id="preview">
+            <div class="preview-bar">
+              <span>Preview</span>
+              <div class="seg" role="radiogroup" aria-label="Preview">
+                <button role="radio" aria-checked="true" data-pv="viewer">Covered</button>
+                <button role="radio" aria-checked="false" data-pv="you">Original</button>
+              </div>
+            </div>
+            <div class="preview-body" id="previewBody">
+              <div class="mail">
+                <div class="mail-head"><b>Ananya Kapoor</b><span>ananya.kapoor@northwind.in</span><time>10:42</time></div>
+                <p>Call me on +91 98765 43210 once you're free. Card on file: 4111 1111 1111 1111. PAN for the invoice is ABCPE1234F.</p>
+              </div>
+              <pre class="code">GITHUB_TOKEN=ghp_8fK2xQ9mVt7Lr1ZsP0cWbN4yHd6Ue3Ja5Gk1
+STRIPE_SECRET_KEY=demo-not-a-real-key-7f3a9c2e
+DATABASE_URL=postgres://admin:s3cr3tPass@203.0.113.42/app</pre>
+              <div class="form-demo">
+                <label>Email<input type="email" value="raktim.yoddha@gmail.com" readonly tabindex="-1" /></label>
+                <label>Phone<input type="tel" value="+1 415-555-0132" readonly tabindex="-1" /></label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="privacy" class="prose">
+          <h2>Privacy</h2>
+          <p>Nothing leaves your computer. No servers, accounts, analytics or network code. Settings stay on this device.</p>
+          <p>Chrome calls the site access “read and change all your data”. Cloak Desk reads page text only to cover it, and never stores or changes it.</p>
+          <h3>What it can't cover</h3>
+          <ul>
+            <li>Chrome's own interface, <code>chrome://</code> pages and the Web Store</li>
+            <li>Text in images, video, PDFs and canvas apps like Google Docs</li>
+            <li>Matches highlighted by Find (Ctrl+F)</li>
+            <li>Other desktop apps. <a href="https://github.com/raktim-yoddha/cloak-desk#readme" target="_blank" rel="noopener">Cloak Desk for Windows</a> covers those.</li>
+          </ul>
+        </section>
+
+        <section id="data">
+          <h2>Data</h2>
+          <div class="list">
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Export settings</span>
+                <p class="row-desc">Your words and sites, as JSON</p>
+              </div>
+              <button class="btn" id="exportBtn">Export</button>
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Import settings</span>
+                <p class="row-desc">Replaces your settings</p>
+              </div>
+              <button class="btn" id="importBtn">Import</button>
+              <input type="file" id="importFile" accept="application/json,.json" hidden />
+            </div>
+            <div class="row">
+              <div class="row-text">
+                <span class="row-title">Reset</span>
+                <p class="row-desc">Back to defaults</p>
+              </div>
+              <button class="btn btn-danger" id="resetBtn">Reset</button>
+            </div>
+          </div>
+          <p class="version" id="version"></p>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="../shared/settings.js"></script>
+    <script src="../shared/detectors.js"></script>
+    <script src="../shared/masker.js"></script>
+    <script src="../ui/icons.js"></script>
+    <script src="../ui/store.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

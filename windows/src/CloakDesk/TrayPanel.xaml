@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Compact panel opened from the tray icon: everything you need while sharing, without the full window. -->
+<Window
+    x:Class="CloakDesk.TrayPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Cloak Desk panel">
+
+    <StackPanel x:Name="Root" Padding="20,20,20,16" Spacing="16">
+
+        <Grid ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Image x:Name="Logo" Width="18" Height="18" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Cloak Desk" />
+            <TextBlock x:Name="StateText" Grid.Column="2" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Grid>
+
+        <!-- The one thing you came for -->
+        <Border Padding="16,14" Background="{ThemeResource GlassBrush}" BorderBrush="{ThemeResource GlassEdgeBrush}"
+                BorderThickness="0,1,0,0" CornerRadius="8">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" FontSize="18" Text="Cloak" />
+                    <TextBlock x:Name="CloakHint" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
+                <ToggleSwitch x:Name="CloakSwitch" Grid.Column="1" MinWidth="0" OffContent="" OnContent=""
+                              Toggled="OnCloakToggled" AutomationProperties.Name="Cloak" />
+            </Grid>
+        </Border>
+
+        <TextBlock x:Name="ErrorText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" Visibility="Collapsed" />
+
+        <StackPanel Spacing="8">
+            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="Preset" />
+            <ScrollViewer MaxHeight="132">
+                <StackPanel x:Name="PresetList" Spacing="2" />
+            </ScrollViewer>
+        </StackPanel>
+
+        <Border Padding="16,4" Background="{ThemeResource GlassBrush}" BorderBrush="{ThemeResource GlassEdgeBrush}"
+                BorderThickness="0,1,0,0" CornerRadius="8">
+            <StackPanel>
+                <Grid MinHeight="44">
+                    <TextBlock VerticalAlignment="Center" Text="Hide desktop" />
+                    <ToggleSwitch x:Name="DesktopSwitch" HorizontalAlignment="Right" MinWidth="0" OffContent="" OnContent=""
+                                  Toggled="OnDesktopToggled" AutomationProperties.Name="Hide desktop" />
+                </Grid>
+                <Grid MinHeight="44">
+                    <TextBlock VerticalAlignment="Center" Text="Start with Windows" />
+                    <ToggleSwitch x:Name="StartupSwitch" HorizontalAlignment="Right" MinWidth="0" OffContent="" OnContent=""
+                                  Toggled="OnStartupToggled" AutomationProperties.Name="Start with Windows" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Grid ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button HorizontalAlignment="Stretch" Click="OnOpen" Content="Open Cloak Desk" />
+            <Button Grid.Column="1" Click="OnExit" Content="Exit" />
+        </Grid>
+    </StackPanel>
+</Window>

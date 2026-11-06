@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Cloak Desk Browser Safety",
+  "short_name": "Cloak Desk",
+  "version": "0.1.0",
+  "description": "Hide emails, phone numbers, cards, IDs and API keys on every web page while you stream or share your screen.",
+  "minimum_chrome_version": "120",
+  "icons": {
+    "16": "icons/app-16.png",
+    "32": "icons/app-32.png",
+    "48": "icons/app-48.png",
+    "128": "icons/app-128.png"
+  },
+  "action": {
+    "default_title": "Cloak Desk",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/off-16.png",
+      "32": "icons/off-32.png",
+      "48": "icons/off-48.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "src/background/sw.js"
+  },
+  "permissions": ["storage", "scripting", "contextMenus"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/share-hook.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_origin_as_fallback": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/shared/settings.js", "src/shared/detectors.js", "src/shared/masker.js", "src/content/mask.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_origin_as_fallback": true
+    }
+  ],
+  "commands": {
+    "toggle-cloak": {
+      "suggested_key": { "default": "Alt+Shift+H" },
+      "description": "Turn hiding on or off"
+    },
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+K" },
+      "description": "Open the Cloak Desk panel"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  }
+}
