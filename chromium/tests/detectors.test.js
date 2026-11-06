@@ -66,7 +66,8 @@ test('secrets and tokens', () => {
     'AKIAIOSFODNN7EXAMPLE',
     // built at runtime so the repository never contains a Stripe-shaped literal (push protection)
     ['sk', 'live', 'Zz9fakeKeyForTestsOnly00'].join('_'),
-    'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY',
+    // fake Google API key, built at runtime for the same reason (secret scanning)
+    ['AI', 'za', 'FakeKeyForTestsOnly', '0'.repeat(16)].join(''),
     'sk-ant-api03-abcdefghijklmnopqrstuvwxyz012345',
     'sk-proj-abcdefghijklmnopqrstuvwxyz012345',
     'xoxb-123456789012-123456789012-abcdefghijkl',
