@@ -1,0 +1,48 @@
+PASS  Panel opens on launch
+PASS  Memory under 150 MB (49.3 MB private)
+PASS  Default preset shown
+PASS  Version shown
+PASS  Panel docked next to the tray (panel 632,108,380,600, work area {X=0,Y=0,Width=1024,Height=720})
+PASS  Pin is saved
+PASS  Pinned panel stays open when another app is in front
+PASS  Tray click keeps a pinned panel open
+PASS  Cloak switch starts the Stage window
+PASS  App alive with the Stage rendering
+PASS  No error shown
+PASS  Cloak switch closes the Stage window
+PASS  Ctrl+Alt+C turns the cloak on
+PASS  Switch follows the hotkey
+PASS  Ctrl+Alt+C turns the cloak off
+PASS  Ctrl+Alt+H saves the app in front to the preset (foreground pid 1296, charmap pid 1296)
+PASS  Hidden app listed in the panel
+PASS  Cloak on with the app hidden
+PASS  Remove button un-hides it
+PASS  Ctrl+Alt+H hides it again (foreground pid 1296)
+PASS  Ctrl+Alt+H once more shows it (foreground pid 1296)
+PASS  Typed app name is saved (lowercase, no .exe)
+PASS  And removed again
+PASS  New preset is saved and selected
+PASS  New preset listed in the panel
+PASS  Renaming saves the name
+PASS  Renamed preset shows in the list
+PASS  Selecting a preset saves it as active
+PASS  Delete removes the preset
+PASS  Last preset cannot be deleted
+PASS  Settings switch unpins too
+PASS  And pins again
+PASS  Pin button follows the switch
+PASS  Presets file path shown
+PASS  Curtain color shown
+PASS  Hide desktop is saved
+PASS  Start with Windows writes the Run key ("D:\a\cloak-desk\cloak-desk\out-x64\CloakDesk.exe" --tray)
+PASS  Turning it off removes the Run key
+PASS  Second launch exits
+PASS  First instance keeps running
+PASS  --tray with pin on shows the panel
+PASS  Presets persist across restarts
+PASS  Unpin is saved
+PASS  Tray click closes the unpinned panel
+PASS  Tray click opens it again
+PASS  Unpinned panel closes when another app is in front
+PASS  --tray with pin off starts without a window
+PASS  No crash.log written

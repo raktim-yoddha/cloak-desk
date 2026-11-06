@@ -1,0 +1,17 @@
+== by folder
+     6,022 KB    5 files  .
+        17 KB    2 files  Assets
+== by extension
+     5,616 KB    1 files  .exe
+       390 KB    1 files  .dll
+        17 KB    2 files  .ico
+         9 KB    1 files  .pri
+         8 KB    2 files  .xbf
+== all files
+     5,616 KB  CloakDesk.exe
+       390 KB  Microsoft.WindowsAppRuntime.Bootstrap.dll
+         9 KB  Assets\CloakDeskOn.ico
+         9 KB  Assets\CloakDesk.ico
+         9 KB  CloakDesk.pri
+         6 KB  TrayPanel.xbf
+         1 KB  App.xbf

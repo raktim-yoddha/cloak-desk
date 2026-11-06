@@ -1,0 +1,6 @@
+  Determining projects to restore...
+  Restored D:\a\cloak-desk\cloak-desk\windows\src\CloakDesk\CloakDesk.csproj (in 57.88 sec).
+  CloakDesk -> D:\a\cloak-desk\cloak-desk\windows\src\CloakDesk\bin\x64\Release\net10.0-windows10.0.22621.0\win-x64\CloakDesk.dll
+  Generating native code
+C:\Users\runneradmin\.nuget\packages\sharpgen.runtime\2.4.2-beta\lib\net9.0\SharpGen.Runtime.dll : warning IL2104: Assembly 'SharpGen.Runtime' produced trim warnings. For more information see https://aka.ms/il2104 [D:\a\cloak-desk\cloak-desk\windows\src\CloakDesk\CloakDesk.csproj]
+  CloakDesk -> D:\a\cloak-desk\cloak-desk\out-x64\
